@@ -5,10 +5,9 @@ from sqlalchemy import func, desc
 
 from . import dashboard_bp
 from ...extensions import db
-from ...utils.decorators import login_required_with_tenant, admin_required  # <-- Agregado admin_required
+from ...utils.decorators import login_required_with_tenant, admin_required
 from ...models.product import Product, LOW_STOCK_THRESHOLD
 from ...models.sale import Sale, SaleItem
-
 from ...models.user import User
 
 # ==========================================
@@ -31,7 +30,6 @@ def employees():
 def employee_create():
     email = request.form.get('email', '').strip().lower()
 
-    # Verificar email duplicado en el tenant
     if User.query.filter_by(tenant_id=current_user.tenant_id, email=email).first():
         flash('Ya existe un usuario con ese email en tu negocio.', 'danger')
         return redirect(url_for('dashboard.employees'))
@@ -53,14 +51,13 @@ def employee_create():
 @login_required_with_tenant
 @admin_required
 def employee_toggle(user_id):
-    # No puede desactivarse a sí mismo
     if user_id == current_user.id:
         flash('No podés desactivar tu propia cuenta.', 'warning')
         return redirect(url_for('dashboard.employees'))
 
     user = User.query.filter_by(
         id=user_id,
-        tenant_id=current_user.tenant_id  # seguridad multi-tenant
+        tenant_id=current_user.tenant_id
     ).first_or_404()
 
     user.is_active = not user.is_active
@@ -70,19 +67,17 @@ def employee_toggle(user_id):
 
 
 # ==========================================
-# RUTAS DE CONFIGURACIÓN
+# RUTAS DE PERFIL / CONFIGURACIÓN
 # ==========================================
 
 @dashboard_bp.route('/configuracion')
 @login_required_with_tenant
-@admin_required
 def settings():
     return render_template('dashboard/settings.html')
 
 
 @dashboard_bp.route('/configuracion/actualizar', methods=['POST'])
 @login_required_with_tenant
-@admin_required
 def settings_update():
     action = request.form.get('action')
 
@@ -105,6 +100,10 @@ def settings_update():
             flash('Contraseña cambiada correctamente.', 'success')
 
     elif action == 'business':
+        if not current_user.is_admin:
+            flash('No tenés permisos para cambiar los datos del negocio.', 'danger')
+            return redirect(url_for('dashboard.settings'))
+            
         current_user.tenant.name = request.form.get('business_name', '').strip()
         db.session.commit()
         flash('Datos del negocio actualizados.', 'success')
@@ -113,7 +112,7 @@ def settings_update():
 
 
 # ==========================================
-# RUTA DE GESTIÓN
+# RUTA DE GESTIÓN (MÉTRICAS DETALLADAS)
 # ==========================================
 
 @dashboard_bp.route('/gestion')
@@ -122,7 +121,6 @@ def gestion():
     tenant_id = current_user.tenant_id
     today = datetime.utcnow()
 
-    # --- Gráfico de ventas semanal (últimos 7 días) ---
     weekly_data = []
     for i in range(6, -1, -1):
         day = today - timedelta(days=i)
@@ -134,11 +132,10 @@ def gestion():
             Sale.created_at <= day_end
         ).scalar() or 0
         weekly_data.append({
-            'day': day.strftime('%a'),   # Lun, Mar, etc.
+            'day': day.strftime('%a'),
             'total': float(total)
         })
 
-    # --- Top 5 productos más vendidos ---
     top_products = db.session.query(
         SaleItem.product_name,
         func.sum(SaleItem.quantity).label('total_qty'),
@@ -147,19 +144,18 @@ def gestion():
         Sale.tenant_id == tenant_id
     ).group_by(SaleItem.product_name).order_by(desc('total_qty')).limit(5).all()
 
-    # --- Stock crítico ---
     low_stock = Product.query.filter(
         Product.tenant_id == tenant_id,
         Product.is_active == True,
         Product.stock <= LOW_STOCK_THRESHOLD
     ).order_by(Product.stock).all()
 
-    # --- Métricas del día ---
     today_start = today.replace(hour=0, minute=0, second=0, microsecond=0)
     today_sales = db.session.query(func.sum(Sale.total_amount)).filter(
         Sale.tenant_id == tenant_id,
         Sale.created_at >= today_start
     ).scalar() or 0
+    
     today_profit = db.session.query(
         func.sum(Sale.total_amount - Sale.total_cost)
     ).filter(
@@ -185,8 +181,8 @@ def gestion():
 @login_required_with_tenant
 def index():
     tenant_id = current_user.tenant_id
+    today = datetime.utcnow()
 
-    # Métricas rápidas
     total_products = Product.query.filter_by(tenant_id=tenant_id, is_active=True).count()
     low_stock_count = Product.query.filter(
         Product.tenant_id == tenant_id,
@@ -194,7 +190,7 @@ def index():
         Product.stock <= 5
     ).count()
 
-    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_start = today.replace(hour=0, minute=0, second=0, microsecond=0)
     today_sales = db.session.query(func.sum(Sale.total_amount)).filter(
         Sale.tenant_id == tenant_id,
         Sale.created_at >= today_start
@@ -207,7 +203,6 @@ def index():
         Sale.created_at >= today_start
     ).scalar() or 0
 
-    # Productos del usuario (Hub)
     owned_apps = [
         {
             'name': 'Sistema de Gestión',
@@ -218,7 +213,6 @@ def index():
         }
     ]
 
-    # Apps para explorar
     explore_apps = [
         {
             'name': 'Módulo de Reservas',
