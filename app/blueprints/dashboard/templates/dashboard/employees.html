@@ -1,0 +1,115 @@
+{% extends "base_app.html" %}
+{% block title %}Empleados{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-8">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Empleados</h1>
+        <p class="text-gray-400 text-sm">Gestioná el acceso de tu equipo</p>
+    </div>
+    <button onclick="document.getElementById('modalNuevo').classList.remove('hidden')"
+            class="bg-green-600 text-white font-medium px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm">
+        + Agregar empleado
+    </button>
+</div>
+
+<!-- Tabla de empleados -->
+<div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b border-gray-100">
+            <tr>
+                <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Nombre</th>
+                <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Email</th>
+                <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Rol</th>
+                <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Estado</th>
+                <th class="px-6 py-3"></th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+            {% for emp in employees %}
+            <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium text-gray-900">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-sm font-bold">
+                            {{ emp.username[0].upper() }}
+                        </div>
+                        {{ emp.username }}
+                        {% if emp.id == current_user.id %}
+                        <span class="text-xs text-gray-400">(vos)</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td class="px-6 py-4 text-gray-500">{{ emp.email }}</td>
+                <td class="px-6 py-4">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-medium
+                        {% if emp.role == 'admin' %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-600{% endif %}">
+                        {{ 'Admin' if emp.role == 'admin' else 'Vendedor' }}
+                    </span>
+                </td>
+                <td class="px-6 py-4">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-medium
+                        {% if emp.is_active %}bg-green-50 text-green-600{% else %}bg-red-50 text-red-500{% endif %}">
+                        {{ 'Activo' if emp.is_active else 'Inactivo' }}
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                    {% if emp.id != current_user.id %}
+                    <div class="flex items-center justify-end gap-3">
+                        <form method="POST" action="{{ url_for('dashboard.employee_toggle', user_id=emp.id) }}">
+                            <button type="submit"
+                                    class="text-xs font-medium {% if emp.is_active %}text-red-500 hover:underline{% else %}text-green-600 hover:underline{% endif %}">
+                                {{ 'Desactivar' if emp.is_active else 'Activar' }}
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal nuevo empleado -->
+<div id="modalNuevo" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 flex">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+        <h3 class="text-lg font-bold text-gray-900 mb-6">Nuevo empleado</h3>
+        <form method="POST" action="{{ url_for('dashboard.employee_create') }}" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                <input type="text" name="username" required
+                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" name="email" required
+                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña temporal</label>
+                <input type="password" name="password" required minlength="8"
+                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+                <select name="role"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <option value="seller">Vendedor (solo POS)</option>
+                    <option value="admin">Admin (acceso total)</option>
+                </select>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="submit"
+                        class="flex-1 bg-green-600 text-white font-semibold py-2.5 rounded-lg hover:bg-green-700 transition-colors text-sm">
+                    Crear empleado
+                </button>
+                <button type="button"
+                        onclick="document.getElementById('modalNuevo').classList.add('hidden')"
+                        class="flex-1 border border-gray-300 text-gray-600 font-semibold py-2.5 rounded-lg hover:bg-gray-50 text-sm">
+                    Cancelar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base_app.html" %}
+{% block title %}Cierre de Caja{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">Cierre de Caja</h1>
+    <p class="text-gray-500 mt-1">Últimas 24 horas — desde {{ since.strftime('%d/%m/%Y %H:%M') }}</p>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+    <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <p class="text-sm text-gray-500 mb-1">Total facturado</p>
+        <p class="text-3xl font-bold text-gray-900">${{ "%.2f"|format(grand_total) }}</p>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <p class="text-sm text-gray-500 mb-1">Ganancia neta</p>
+        <p class="text-3xl font-bold text-green-600">${{ "%.2f"|format(grand_profit) }}</p>
+    </div>
+</div>
+
+<div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100">
+        <h2 class="font-semibold text-gray-900">Desglose por método de pago</h2>
+    </div>
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Método</th>
+                <th class="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Transacciones</th>
+                <th class="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Total</th>
+                <th class="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Ganancia</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            {% for row in results %}
+            <tr>
+                <td class="px-6 py-4 font-medium capitalize">
+                    {% if row.payment_method == 'cash' %}💵 Efectivo
+                    {% elif row.payment_method == 'card' %}💳 Tarjeta
+                    {% elif row.payment_method == 'transfer' %}🔁 Transferencia
+                    {% else %}{{ row.payment_method }}{% endif %}
+                </td>
+                <td class="px-6 py-4 text-right text-gray-600">{{ row.count }}</td>
+                <td class="px-6 py-4 text-right font-semibold">${{ "%.2f"|format(row.total) }}</td>
+                <td class="px-6 py-4 text-right text-green-600 font-medium">${{ "%.2f"|format(row.profit) }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" class="px-6 py-12 text-center text-gray-400">No hay ventas en las últimas 24 horas.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="mt-4">
+    <a href="{{ url_for('reports.sales_history') }}" class="text-sm text-blue-600 hover:underline">Ver historial completo →</a>
+</div>
+{% endblock %}
