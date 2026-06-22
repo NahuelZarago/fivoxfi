@@ -6,14 +6,14 @@
     <title>Verificá tu email — Fivox</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-br from-gray-50 to-green-50/40 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
 
 {% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
-<div class="fixed top-4 right-4 z-50 space-y-2 max-w-sm">
+<div class="fixed top-4 right-4 z-50 space-y-2 max-w-md">
     {% for c, m in messages %}
-    <div class="px-4 py-3 rounded-xl shadow-lg text-white text-sm font-medium
-        {% if c=='success' %}bg-green-600{% elif c=='danger' %}bg-red-500{% elif c=='warning' %}bg-amber-500{% else %}bg-gray-700{% endif %}">
+    <div class="px-4 py-3 rounded-xl shadow-lg text-white text-sm font-medium leading-relaxed
+        {% if c=='success' %}bg-green-600{% elif c=='danger' %}bg-red-500{% elif c=='warning' %}bg-amber-600{% else %}bg-blue-600{% endif %}">
         {{ m }}
     </div>
     {% endfor %}
@@ -21,66 +21,95 @@
 {% endif %}
 {% endwith %}
 
-<div class="w-full max-w-md text-center">
+<div class="w-full max-w-lg">
 
-    <div class="inline-flex items-center gap-2 mb-10">
-        <div class="w-9 h-9 bg-green-600 rounded-xl flex items-center justify-center">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-            </svg>
+    <!-- Logo -->
+    <div class="text-center mb-8">
+        <a href="{{ url_for('public.index') }}" class="inline-flex items-center gap-2">
+            <div class="w-9 h-9 bg-green-600 rounded-xl flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                </svg>
+            </div>
+            <span class="text-xl font-bold text-gray-900">Fivox</span>
+        </a>
+    </div>
+
+    <!-- Card principal -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+
+        <!-- Header verde -->
+        <div class="bg-green-600 px-8 py-6 text-center">
+            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+            </div>
+            <h1 class="text-xl font-bold text-white mb-1">Verificá tu email</h1>
+            <p class="text-green-100 text-sm">Enviamos un enlace de activación a:</p>
+            <p class="text-white font-bold text-base mt-1 bg-white/10 px-4 py-1.5 rounded-lg inline-block">
+                {{ current_user.email }}
+            </p>
         </div>
-        <span class="text-xl font-bold text-gray-900">Fivox</span>
+
+        <div class="p-8">
+            <!-- Pasos -->
+            <div class="space-y-3 mb-6">
+                <div class="flex items-start gap-3">
+                    <div class="w-6 h-6 rounded-full bg-green-100 text-green-700 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">1</div>
+                    <p class="text-sm text-gray-600">Abrí tu casilla de <strong>{{ current_user.email }}</strong></p>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="w-6 h-6 rounded-full bg-green-100 text-green-700 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">2</div>
+                    <p class="text-sm text-gray-600">Buscá el correo de <strong>Fivox</strong> (revisá spam/promociones)</p>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="w-6 h-6 rounded-full bg-green-100 text-green-700 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">3</div>
+                    <p class="text-sm text-gray-600">Hacé clic en <strong>"Verificar mi email"</strong></p>
+                </div>
+            </div>
+
+            <!-- Reenviar -->
+            <form method="POST" action="{{ url_for('auth.resend_verification') }}" class="mb-4">
+                <button type="submit"
+                        class="w-full border-2 border-green-500 text-green-600 font-semibold py-2.5 rounded-xl hover:bg-green-50 transition-colors text-sm">
+                    Reenviar correo de verificación
+                </button>
+            </form>
+
+            <!-- Si no llega: instrucciones de configuración -->
+            <details class="group">
+                <summary class="cursor-pointer text-sm text-gray-500 hover:text-gray-700 flex items-center gap-2 select-none">
+                    <svg class="w-4 h-4 group-open:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                    ¿No llega el correo? Ver instrucciones de configuración
+                </summary>
+                <div class="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-4">
+                    <p class="text-xs font-bold text-amber-800 mb-2 uppercase tracking-wide">⚙ Configuración requerida</p>
+                    <p class="text-xs text-amber-700 mb-3">
+                        Para que el sistema envíe emails, necesitás configurar tu cuenta Gmail en el archivo <code class="bg-amber-100 px-1 rounded">.env</code>:
+                    </p>
+                    <ol class="text-xs text-amber-700 space-y-1.5 list-none">
+                        <li class="flex gap-2"><span class="font-bold">1.</span> Entrá a <strong>myaccount.google.com</strong> → Seguridad</li>
+                        <li class="flex gap-2"><span class="font-bold">2.</span> Activá <strong>Verificación en 2 pasos</strong></li>
+                        <li class="flex gap-2"><span class="font-bold">3.</span> Buscá <strong>"Contraseñas de aplicación"</strong></li>
+                        <li class="flex gap-2"><span class="font-bold">4.</span> Generá una para "Correo" → copiá las 16 letras</li>
+                        <li class="flex gap-2"><span class="font-bold">5.</span> Pegá esa contraseña en <code class="bg-amber-100 px-1 rounded">MAIL_PASSWORD</code> del <code class="bg-amber-100 px-1 rounded">.env</code></li>
+                        <li class="flex gap-2"><span class="font-bold">6.</span> Reiniciá el servidor con <code class="bg-amber-100 px-1 rounded">python run.py</code></li>
+                    </ol>
+                </div>
+            </details>
+        </div>
     </div>
 
-    <!-- Ícono email animado -->
-    <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-        <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-        </svg>
-    </div>
-
-    <h1 class="text-2xl font-bold text-gray-900 mb-3">Revisá tu bandeja de entrada</h1>
-    <p class="text-gray-500 mb-2 leading-relaxed">
-        Enviamos un correo de verificación a:
+    <p class="text-center mt-5">
+        <a href="{{ url_for('auth.logout') }}"
+           class="text-sm text-gray-400 hover:text-gray-700 transition-colors">
+            Cerrar sesión
+        </a>
     </p>
-    <p class="text-green-700 font-bold text-base bg-green-50 border border-green-100 px-5 py-2 rounded-xl inline-block mb-8">
-        {{ current_user.email }}
-    </p>
-
-    <div class="bg-white rounded-2xl border border-gray-200 p-6 mb-5 text-left">
-        <h3 class="font-semibold text-gray-900 mb-3 text-sm">¿Qué hacer ahora?</h3>
-        <ol class="space-y-2 text-sm text-gray-600">
-            <li class="flex items-start gap-2.5">
-                <span class="w-5 h-5 rounded-full bg-green-100 text-green-700 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
-                Abrí el correo que te enviamos desde Fivox
-            </li>
-            <li class="flex items-start gap-2.5">
-                <span class="w-5 h-5 rounded-full bg-green-100 text-green-700 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
-                Hacé clic en "Verificar mi email"
-            </li>
-            <li class="flex items-start gap-2.5">
-                <span class="w-5 h-5 rounded-full bg-green-100 text-green-700 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
-                Elegí si sos dueño del negocio o empleado
-            </li>
-        </ol>
-    </div>
-
-    <p class="text-xs text-gray-400 mb-4">¿No llegó? Revisá spam o solicitá uno nuevo:</p>
-    <form method="POST" action="{{ url_for('auth.resend_verification') }}">
-        <button type="submit"
-                class="w-full border border-green-500 text-green-600 font-semibold py-2.5 rounded-xl hover:bg-green-50 transition-colors text-sm mb-4">
-            Reenviar correo de verificación
-        </button>
-    </form>
-
-    <a href="{{ url_for('auth.logout') }}"
-       class="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition-colors">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7"/>
-        </svg>
-        Volver al inicio
-    </a>
 </div>
 </body>
 </html>

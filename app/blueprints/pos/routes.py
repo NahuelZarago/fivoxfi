@@ -4,7 +4,7 @@ from . import pos_bp
 from ...extensions import db
 from ...models.product import Product
 from ...models.sale import Sale, SaleItem
-from ...utils.decorators import login_required_with_tenant, seller_or_owner_required as seller_or_admin_required
+from ...utils.decorators import login_required_with_tenant, seller_or_admin_required
 
 
 @pos_bp.route('/terminal')
