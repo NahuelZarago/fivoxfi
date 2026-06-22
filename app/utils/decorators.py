@@ -10,6 +10,9 @@ def login_required_with_tenant(f):
         if not current_user.is_authenticated:
             flash('Necesitás iniciar sesión.', 'warning')
             return redirect(url_for('auth.login'))
+        if not current_user.is_confirmed:
+            return redirect(url_for('auth.unconfirmed'))
+        
         if not current_user.tenant.is_active:
             abort(403)
         return f(*args, **kwargs)

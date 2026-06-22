@@ -19,6 +19,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(20), nullable=False, default='seller')  # 'admin' | 'seller'
     is_active = db.Column(db.Boolean, default=True)
+    is_confirmed = db.Column(db.Boolean, default=False, nullable=False) 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     __table_args__ = (

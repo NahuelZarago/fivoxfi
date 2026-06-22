@@ -1,11 +1,13 @@
 from flask import Flask
 from .extensions import db, login_manager, migrate
 from config import config
+from .extensions import db, login_manager, migrate, mail # < importar mail
 
 
 def create_app(config_name='default'):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
+    mail.init_app(app)
 
     # Inicializar extensiones
     db.init_app(app)

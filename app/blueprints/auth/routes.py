@@ -1,8 +1,10 @@
 import re
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_user, logout_user, login_required, current_user
+from flask_mail import Message
+from itsdangerous import URLSafeTimedSerializer
 from . import auth_bp
-from ...extensions import db
+from ...extensions import db, mail
 from ...models.tenant import Tenant
 from ...models.user import User
 
@@ -63,12 +65,26 @@ def register():
             db.session.add(admin)
             db.session.commit()
 
+            # Logueamos al usuario automáticamente
             login_user(admin)
-            flash(f'¡Bienvenido, {username}! Tu negocio "{business_name}" fue creado.', 'success')
-            return redirect(url_for('dashboard.index'))
+
+            # 👇 LÓGICA DE ENVÍO DE CORREO 👇
+            serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+            token = serializer.dumps(email, salt='email-confirm')
+            # _external=True hace que la URL sea completa (http://...) para que funcione en el mail
+            confirm_url = url_for('auth.confirm_email', token=token, _external=True)
+            
+            msg = Message('Confirma tu cuenta en Fivox', recipients=[email])
+            msg.body = f'Hola {username},\n\nPara proteger tu cuenta y activar tu acceso a Fivox, por favor confirmá tu dirección de correo haciendo clic en el siguiente enlace:\n\n{confirm_url}\n\nSi no creaste esta cuenta, ignorá este mensaje.'
+            mail.send(msg)
+
+            flash(f'¡Cuenta creada! Te enviamos un correo para verificar tu email.', 'success')
+            # Redirigimos a la pantalla de bloqueo en vez de al dashboard
+            return redirect(url_for('auth.unconfirmed'))
 
         except Exception as e:
             db.session.rollback()
+            print(f"🔥 ERROR REAL AL REGISTRAR: {str(e)}")
             flash('Error al crear la cuenta. El email ya puede estar registrado.', 'danger')
             return render_template('auth/register.html')
 
@@ -103,3 +119,35 @@ def logout():
     logout_user()
     flash('Sesión cerrada correctamente.', 'info')
     return redirect(url_for('public.index'))
+
+
+@auth_bp.route('/cuenta-no-confirmada')
+@login_required
+def unconfirmed():
+    if current_user.is_confirmed:
+        return redirect(url_for('dashboard.index'))
+    return render_template('auth/unconfirmed.html')
+
+
+# 👇 NUEVA RUTA PARA PROCESAR EL CLIC DEL CORREO 👇
+@auth_bp.route('/confirmar/<token>')
+@login_required
+def confirm_email(token):
+    serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    try:
+        # El token expira en 3600 segundos (1 hora)
+        email = serializer.loads(token, salt='email-confirm', max_age=3600)
+    except:
+        flash('El enlace de confirmación es inválido o expiró.', 'danger')
+        return redirect(url_for('auth.unconfirmed'))
+
+    if current_user.email != email:
+        flash('Acceso denegado. Este enlace no corresponde a tu cuenta.', 'danger')
+        return redirect(url_for('public.index'))
+
+    if not current_user.is_confirmed:
+        current_user.is_confirmed = True
+        db.session.commit()
+        flash('¡Excelente! Tu cuenta ya está verificada.', 'success')
+    
+    return redirect(url_for('dashboard.index'))
