@@ -1,23 +1,19 @@
 from flask import Flask
-from .extensions import db, login_manager, migrate
+from .extensions import db, login_manager, migrate, mail
 from config import config
-from .extensions import db, login_manager, migrate, mail # < importar mail
 
 
 def create_app(config_name='default'):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
-    mail.init_app(app)
 
-    # Inicializar extensiones
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
+    mail.init_app(app)
 
-    # Importar modelos para que Flask-Migrate los detecte
     from .models import user, tenant, product, sale  # noqa: F401
 
-    # Registrar Blueprints
     from .blueprints.public import public_bp
     from .blueprints.auth import auth_bp
     from .blueprints.dashboard import dashboard_bp

@@ -8,12 +8,7 @@ class Product(db.Model):
     __tablename__ = 'products'
 
     id = db.Column(db.Integer, primary_key=True)
-    tenant_id = db.Column(
-        db.Integer,
-        db.ForeignKey('tenants.id', ondelete='CASCADE'),
-        nullable=False,
-        index=True
-    )
+    tenant_id = db.Column(db.Integer, db.ForeignKey('tenants.id', ondelete='CASCADE'), nullable=False, index=True)
     name = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=True)
     sku = db.Column(db.String(100), nullable=True)
@@ -24,12 +19,10 @@ class Product(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    __table_args__ = (
-        db.UniqueConstraint('tenant_id', 'sku', name='uq_sku_per_tenant'),
-    )
+    __table_args__ = (db.UniqueConstraint('tenant_id', 'sku', name='uq_sku_per_tenant'),)
 
     @property
-    def is_low_stock(self) -> bool:
+    def is_low_stock(self):
         return self.stock <= LOW_STOCK_THRESHOLD
 
     @property
@@ -37,15 +30,8 @@ class Product(db.Model):
         return float(self.sale_price) - float(self.cost_price)
 
     def to_dict(self):
-        """Serializa el producto para respuestas JSON (usado en el POS)."""
         return {
-            'id': self.id,
-            'name': self.name,
-            'sku': self.sku or '',
-            'sale_price': float(self.sale_price),
-            'stock': self.stock,
+            'id': self.id, 'name': self.name, 'sku': self.sku or '',
+            'sale_price': float(self.sale_price), 'stock': self.stock,
             'is_low_stock': self.is_low_stock,
         }
-
-    def __repr__(self):
-        return f'<Product {self.name} | Stock: {self.stock}>'

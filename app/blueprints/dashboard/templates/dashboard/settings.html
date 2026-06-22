@@ -2,45 +2,42 @@
 {% block title %}Configuración{% endblock %}
 
 {% block content %}
-
 <div class="mb-8">
     <h1 class="text-2xl font-bold text-gray-900">Configuración</h1>
-    <p class="text-gray-500 text-sm mt-1">Administrá tu cuenta y los datos de tu negocio</p>
+    <p class="text-gray-500 text-sm mt-1">Administrá tu perfil y los datos de tu negocio</p>
 </div>
 
-<div class="max-w-2xl space-y-6">
+<div class="max-w-2xl space-y-5">
 
-    <!-- Datos personales -->
     <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
             <h2 class="font-semibold text-gray-900 text-sm">Datos personales</h2>
         </div>
         <div class="p-6">
             <form method="POST" action="{{ url_for('dashboard.settings_update') }}" class="space-y-4">
                 <input type="hidden" name="action" value="profile">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Nombre</label>
-                    <input type="text" name="username" value="{{ current_user.username }}" required
-                           class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Nombre</label>
+                        <input type="text" name="username" value="{{ current_user.username }}" required
+                               class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+                        <input type="email" name="email" value="{{ current_user.email }}" required
+                               class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
-                    <input type="email" name="email" value="{{ current_user.email }}" required
-                           class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                </div>
-                <div class="pt-1">
-                    <button type="submit"
-                            class="bg-green-600 text-white font-medium px-5 py-2.5 rounded-xl hover:bg-green-700 transition-colors text-sm">
-                        Guardar cambios
-                    </button>
-                </div>
+                <button type="submit"
+                        class="bg-green-600 text-white font-medium px-5 py-2.5 rounded-xl hover:bg-green-700 transition-colors text-sm">
+                    Guardar cambios
+                </button>
             </form>
         </div>
     </div>
 
-    <!-- Cambiar contraseña -->
     <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
             <h2 class="font-semibold text-gray-900 text-sm">Cambiar contraseña</h2>
         </div>
         <div class="p-6">
@@ -49,28 +46,25 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Contraseña actual</label>
                     <input type="password" name="current_password" required
-                           class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Nueva contraseña</label>
                     <input type="password" name="new_password" minlength="8" required
-                           class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"
                            placeholder="Mínimo 8 caracteres">
                 </div>
-                <div class="pt-1">
-                    <button type="submit"
-                            class="bg-green-600 text-white font-medium px-5 py-2.5 rounded-xl hover:bg-green-700 transition-colors text-sm">
-                        Cambiar contraseña
-                    </button>
-                </div>
+                <button type="submit"
+                        class="bg-green-600 text-white font-medium px-5 py-2.5 rounded-xl hover:bg-green-700 transition-colors text-sm">
+                    Cambiar contraseña
+                </button>
             </form>
         </div>
     </div>
 
-    <!-- Datos del negocio (solo admin) -->
     {% if current_user.is_admin %}
     <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
             <h2 class="font-semibold text-gray-900 text-sm">Datos del negocio</h2>
         </div>
         <div class="p-6">
@@ -79,32 +73,26 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Nombre del negocio</label>
                     <input type="text" name="business_name" value="{{ current_user.tenant.name }}" required
-                           class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
                 </div>
-                <div class="pt-1">
-                    <button type="submit"
-                            class="bg-green-600 text-white font-medium px-5 py-2.5 rounded-xl hover:bg-green-700 transition-colors text-sm">
-                        Actualizar negocio
-                    </button>
-                </div>
+                <button type="submit"
+                        class="bg-green-600 text-white font-medium px-5 py-2.5 rounded-xl hover:bg-green-700 transition-colors text-sm">
+                    Actualizar negocio
+                </button>
             </form>
         </div>
     </div>
     {% endif %}
 
-    <!-- Info de cuenta -->
-    <div class="bg-gray-50 rounded-2xl border border-gray-200 p-5">
-        <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                {{ current_user.username[0].upper() }}
-            </div>
-            <div>
-                <p class="font-semibold text-gray-900">{{ current_user.username }}</p>
-                <p class="text-sm text-gray-500">{{ current_user.email }}</p>
-                <p class="text-xs text-gray-400 mt-0.5">{{ 'Administrador' if current_user.is_admin else 'Vendedor' }} · {{ current_user.tenant.name }}</p>
-            </div>
+    <div class="bg-gray-50 rounded-2xl border border-gray-200 p-5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+            {{ current_user.username[0].upper() }}
+        </div>
+        <div>
+            <p class="font-semibold text-gray-900">{{ current_user.username }}</p>
+            <p class="text-sm text-gray-500">{{ current_user.email }}</p>
+            <p class="text-xs text-gray-400 mt-0.5">{{ 'Administrador' if current_user.is_admin else 'Vendedor' }} · {{ current_user.tenant.name }}</p>
         </div>
     </div>
-
 </div>
 {% endblock %}

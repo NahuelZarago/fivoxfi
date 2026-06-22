@@ -4,11 +4,10 @@ from flask_migrate import Migrate
 from flask_mail import Mail
 
 db = SQLAlchemy()
-mail = Mail()
 migrate = Migrate()
 login_manager = LoginManager()
-
+mail = Mail()
 
 login_manager.login_view = 'auth.login'
-login_manager.login_message = 'Iniciá sesión para acceder a esta sección.'
+login_manager.login_message = 'Iniciá sesión para continuar.'
 login_manager.login_message_category = 'warning'
