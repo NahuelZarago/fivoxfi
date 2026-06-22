@@ -2,39 +2,54 @@
 {% block title %}Historial de Ventas{% endblock %}
 
 {% block content %}
-<div class="mb-8">
-    <h1 class="text-2xl font-bold text-gray-900">Historial de Ventas</h1>
-    <p class="text-gray-500 mt-1">{{ sales.total }} ventas registradas</p>
+<div class="flex items-center justify-between mb-8">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Historial de Ventas</h1>
+        <p class="text-gray-500 text-sm mt-1">{{ sales.total }} venta{% if sales.total != 1 %}s{% endif %} registradas</p>
+    </div>
+    <a href="{{ url_for('reports.daily_close') }}"
+       class="text-sm text-green-600 font-medium hover:underline">← Cierre de caja</a>
 </div>
 
-<div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+<div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
     <table class="w-full text-sm">
-        <thead class="bg-gray-50 border-b border-gray-200">
+        <thead class="bg-gray-50 border-b border-gray-100">
             <tr>
-                <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">#</th>
-                <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Fecha y hora</th>
-                <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Vendedor</th>
-                <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Pago</th>
-                <th class="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Total</th>
-                <th class="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Ganancia</th>
-                <th class="px-6 py-3"></th>
+                <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase">#</th>
+                <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase">Fecha y hora</th>
+                <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase">Vendedor</th>
+                <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase">Pago</th>
+                <th class="text-right px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase">Total</th>
+                <th class="text-right px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase">Ganancia</th>
+                <th class="px-6 py-3.5"></th>
             </tr>
         </thead>
-        <tbody class="divide-y divide-gray-100">
+        <tbody class="divide-y divide-gray-50">
             {% for sale in sales.items %}
-            <tr class="hover:bg-gray-50">
+            <tr class="hover:bg-gray-50 transition-colors">
                 <td class="px-6 py-4 font-mono text-xs text-gray-400">#{{ sale.id }}</td>
                 <td class="px-6 py-4 text-gray-600">{{ sale.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
-                <td class="px-6 py-4">{{ sale.seller.username if sale.seller else '—' }}</td>
-                <td class="px-6 py-4 capitalize text-gray-600">{{ sale.payment_method }}</td>
-                <td class="px-6 py-4 text-right font-semibold">${{ "%.2f"|format(sale.total_amount) }}</td>
-                <td class="px-6 py-4 text-right text-green-600 font-medium">${{ "%.2f"|format(sale.net_profit) }}</td>
+                <td class="px-6 py-4 font-medium text-gray-900">{{ sale.seller.username if sale.seller else '—' }}</td>
+                <td class="px-6 py-4">
+                    <span class="text-xs font-medium text-gray-500 capitalize">
+                        {% if sale.payment_method == 'cash' %}Efectivo
+                        {% elif sale.payment_method == 'card' %}Tarjeta
+                        {% elif sale.payment_method == 'transfer' %}Transferencia
+                        {% else %}{{ sale.payment_method }}{% endif %}
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-right font-bold text-gray-900">
+                    ${{ "{:,.0f}".format(sale.total_amount).replace(",", ".") }}
+                </td>
+                <td class="px-6 py-4 text-right font-bold text-green-600">
+                    ${{ "{:,.0f}".format(sale.net_profit).replace(",", ".") }}
+                </td>
                 <td class="px-6 py-4 text-right">
                     <details class="text-xs">
-                        <summary class="text-blue-600 cursor-pointer">Ver detalle</summary>
-                        <div class="mt-2 space-y-1 text-gray-600 text-right">
+                        <summary class="text-green-600 cursor-pointer font-medium hover:underline">Detalle</summary>
+                        <div class="mt-2 space-y-1 text-gray-500 text-right">
                             {% for item in sale.items %}
-                            <p>{{ item.product_name }} x{{ item.quantity }} — ${{ "%.2f"|format(item.subtotal) }}</p>
+                            <p>{{ item.product_name }} x{{ item.quantity }} — ${{ "{:,.0f}".format(item.subtotal).replace(",", ".") }}</p>
                             {% endfor %}
                         </div>
                     </details>
@@ -42,24 +57,23 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="7" class="px-6 py-12 text-center text-gray-400">No hay ventas registradas.</td>
+                <td colspan="7" class="px-6 py-16 text-center text-gray-400">No hay ventas registradas.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
 
-<!-- Paginación -->
 {% if sales.pages > 1 %}
 <div class="mt-6 flex items-center justify-center gap-2">
     {% if sales.has_prev %}
     <a href="{{ url_for('reports.sales_history', page=sales.prev_num) }}"
-       class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">← Anterior</a>
+       class="px-4 py-2 border border-gray-200 rounded-xl text-sm hover:bg-gray-50 text-gray-600">← Anterior</a>
     {% endif %}
-    <span class="text-sm text-gray-500">Página {{ sales.page }} de {{ sales.pages }}</span>
+    <span class="text-sm text-gray-500 px-2">Página {{ sales.page }} de {{ sales.pages }}</span>
     {% if sales.has_next %}
     <a href="{{ url_for('reports.sales_history', page=sales.next_num) }}"
-       class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Siguiente →</a>
+       class="px-4 py-2 border border-gray-200 rounded-xl text-sm hover:bg-gray-50 text-gray-600">Siguiente →</a>
     {% endif %}
 </div>
 {% endif %}

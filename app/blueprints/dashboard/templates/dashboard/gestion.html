@@ -1,135 +1,127 @@
 {% extends "base_app.html" %}
-{% block title %}Panel de Gestión{% endblock %}
+{% block title %}Panel de Control{% endblock %}
 
 {% block content %}
 
+<!-- Header -->
 <div class="flex items-center justify-between mb-8">
     <div>
-        <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Panel de Gestión</h1>
-        <p class="text-gray-500 mt-1 flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-green-500"></span>
+        <h1 class="text-2xl font-bold text-gray-900">Panel de Control</h1>
+        <p class="text-gray-500 text-sm mt-0.5 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
             {{ current_user.tenant.name }}
         </p>
     </div>
-    <div class="flex items-center gap-4">
-        <a href="{{ url_for('pos.terminal') }}" 
-           class="hidden sm:flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-blue-700 transition-all shadow-sm hover:shadow-blue-200">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-            </svg>
-            Abrir Caja
-        </a>
-    </div>
+    <a href="{{ url_for('pos.terminal') }}"
+       class="flex items-center gap-2 bg-green-600 text-white px-4 py-2.5 rounded-xl font-medium hover:bg-green-700 transition-colors text-sm shadow-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+        Abrir Caja
+    </a>
 </div>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    
-    <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-        <div class="flex items-start justify-between mb-4">
-            <div>
-                <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Ventas de hoy</p>
-                <h3 class="text-3xl font-bold text-gray-900 mt-2">${{ "%.2f"|format(today_sales) }}</h3>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<!-- Métricas principales -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+
+    <div class="bg-white rounded-2xl border border-gray-200 p-5">
+        <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center">
+                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Ventas hoy</p>
         </div>
+        <p class="text-2xl font-bold text-gray-900">
+            ${{ "{:,.0f}".format(today_sales).replace(",", ".") }}
+        </p>
     </div>
 
-    <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-        <div class="flex items-start justify-between mb-4">
-            <div>
-                <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Ganancia neta</p>
-                <h3 class="text-3xl font-bold text-green-600 mt-2">${{ "%.2f"|format(today_profit) }}</h3>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-green-50 text-green-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white rounded-2xl border border-gray-200 p-5">
+        <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center">
+                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                 </svg>
             </div>
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Ganancia hoy</p>
         </div>
+        <p class="text-2xl font-bold text-green-600">
+            ${{ "{:,.0f}".format(today_profit).replace(",", ".") }}
+        </p>
     </div>
 
-    <div class="bg-white rounded-2xl border {% if low_stock %}border-red-200 bg-red-50{% else %}border-gray-100{% endif %} p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-        <div class="flex items-start justify-between mb-4">
-            <div>
-                <p class="text-sm font-semibold {% if low_stock %}text-red-600{% else %}text-gray-500{% endif %} uppercase tracking-wider">Stock Crítico</p>
-                <h3 class="text-3xl font-bold {% if low_stock %}text-red-600{% else %}text-gray-900{% endif %} mt-2">{{ low_stock|length }}</h3>
-            </div>
-            <div class="w-12 h-12 rounded-xl {% if low_stock %}bg-red-100 text-red-600{% else %}bg-gray-50 text-gray-400{% endif %} flex items-center justify-center group-hover:scale-110 transition-transform">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white rounded-2xl border {% if low_stock %}border-red-200{% else %}border-gray-200{% endif %} p-5">
+        <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 rounded-xl {% if low_stock %}bg-red-50{% else %}bg-gray-50{% endif %} flex items-center justify-center">
+                <svg class="w-4 h-4 {% if low_stock %}text-red-500{% else %}text-gray-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                 </svg>
             </div>
+            <p class="text-xs font-semibold {% if low_stock %}text-red-500{% else %}text-gray-500{% endif %} uppercase tracking-wide">Stock crítico</p>
         </div>
+        <p class="text-2xl font-bold {% if low_stock %}text-red-600{% else %}text-gray-900{% endif %}">
+            {{ low_stock|length }}
+        </p>
     </div>
 
-    <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-        <div class="flex items-start justify-between mb-4">
-            <div class="flex-1 min-w-0 pr-4">
-                <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Producto Estrella</p>
-                <h3 class="text-lg font-bold text-gray-900 mt-2 truncate">
-                    {{ top_products[0].product_name if top_products else 'Sin datos' }}
-                </h3>
-            </div>
-            <div class="w-12 h-12 flex-shrink-0 rounded-xl bg-yellow-50 text-yellow-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white rounded-2xl border border-gray-200 p-5">
+        <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center">
+                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
                 </svg>
             </div>
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Producto estrella</p>
         </div>
+        <p class="text-base font-bold text-gray-900 truncate">
+            {{ top_products[0].product_name if top_products else '—' }}
+        </p>
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Gráfico + Top productos -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
 
-    <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
-        <h2 class="text-lg font-bold text-gray-900 mb-8">Evolución últimos 7 días</h2>
-        <div class="flex items-end justify-between gap-3 h-48">
-            {% set totals = weekly_data|map(attribute='total')|list %}
-            {% set max_val = totals|max if totals else 0 %}
-            
-            {% for day in weekly_data %}
-                {% if max_val > 0 %}
-                    {% set calculated_height = ((day.total / max_val) * 100)|int %}
-                    {% set final_height = calculated_height if calculated_height > 4 else 4 %}
-                {% else %}
-                    {% set final_height = 4 %}
-                {% endif %}
-                
-            <div class="flex-1 flex flex-col items-center gap-2 group">
-                <span class="text-xs font-semibold text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">${{ "%.0f"|format(day.total) }}</span>
-                <div class="w-full max-w-[40px] rounded-t-lg bg-blue-100 group-hover:bg-blue-500 transition-colors relative"
-                     style="height: var(--bar-height);"
-                     --bar-height="{{ final_height }}%">
-                </div>
-                <span class="text-sm text-gray-500 font-medium">{{ day.day }}</span>
-            </div>
-            {% endfor %}
+    <!-- Histograma de ventas -->
+    <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="font-bold text-gray-900">Ventas últimos 7 días</h2>
+            <span class="text-xs text-gray-400">en pesos</span>
+        </div>
+
+        <!-- Datos para JS -->
+        <div id="chartData" data-weekly='{{ weekly_data | tojson | safe }}' class="hidden"></div>
+
+        <div class="relative" style="height: 180px;">
+            <canvas id="salesChart"></canvas>
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
-        <h2 class="text-lg font-bold text-gray-900 mb-6">Los más vendidos</h2>
-        <div class="space-y-5">
+    <div class="bg-white rounded-2xl border border-gray-200 p-6">
+        <h2 class="font-bold text-gray-900 mb-5">Más vendidos</h2>
+        <div class="space-y-4">
             {% for p in top_products %}
-            <div class="flex items-center gap-4 group">
-                <div class="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 text-gray-500 font-bold flex items-center justify-center group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+            <div class="flex items-center gap-3">
+                <span class="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0
+                    {% if loop.index == 1 %}bg-green-100 text-green-700
+                    {% elif loop.index == 2 %}bg-gray-100 text-gray-600
+                    {% else %}bg-gray-50 text-gray-500{% endif %}">
                     {{ loop.index }}
-                </div>
+                </span>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-bold text-gray-900 truncate">{{ p.product_name }}</p>
-                    <p class="text-xs text-gray-500 mt-0.5">{{ p.total_qty }} uds. vendidas</p>
+                    <p class="text-sm font-semibold text-gray-900 truncate">{{ p.product_name|title }}</p>
+                    <p class="text-xs text-gray-400">{{ p.total_qty }} unidades</p>
                 </div>
-                <p class="text-sm font-bold text-green-600">
-                    ${{ "%.0f"|format(p.total_revenue) }}
+                <p class="text-sm font-bold text-green-600 flex-shrink-0">
+                    ${{ "{:,.0f}".format(p.total_revenue).replace(",", ".") }}
                 </p>
             </div>
             {% else %}
-            <div class="text-center py-8">
-                <p class="text-sm text-gray-400">Aún no hay ventas para mostrar.</p>
+            <div class="py-8 text-center">
+                <p class="text-sm text-gray-400">Aún no hay ventas.</p>
+                <a href="{{ url_for('pos.terminal') }}" class="text-xs text-green-600 hover:underline mt-1 block">Registrar primera venta →</a>
             </div>
             {% endfor %}
         </div>
@@ -137,26 +129,51 @@
 </div>
 
 {% if low_stock %}
-<div class="mt-8 bg-white rounded-2xl border border-red-100 p-8 shadow-sm">
-    <div class="flex items-center gap-3 mb-6">
-        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-            <span class="text-xl">⚠️</span>
+<div class="bg-white rounded-2xl border border-gray-200 p-6">
+    <div class="flex items-center gap-3 mb-5">
+        <div class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center">
+            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
         </div>
-        <h2 class="text-lg font-bold text-gray-900">Atención: Reposición sugerida</h2>
+        <div>
+            <h2 class="font-bold text-gray-900">Reposición sugerida</h2>
+            <p class="text-xs text-gray-400">{{ low_stock|length }} producto{% if low_stock|length != 1 %}s{% endif %} con stock bajo</p>
+        </div>
     </div>
-    
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         {% for p in low_stock %}
-        <div class="flex items-center justify-between p-4 rounded-xl border {% if p.stock == 0 %}bg-red-50 border-red-200{% else %}bg-orange-50 border-orange-200{% endif %} transition-colors hover:shadow-sm">
-            <div class="flex-1 min-w-0 pr-4">
-                <p class="text-sm font-bold text-gray-900 truncate">{{ p.name }}</p>
-                <p class="text-xs mt-1 font-medium {% if p.stock == 0 %}text-red-600{% else %}text-orange-600{% endif %}">
-                    {% if p.stock == 0 %}Agotado por completo{% else %}Quedan solo {{ p.stock }} uds.{% endif %}
-                </p>
+        <div class="relative p-4 rounded-xl border transition-all hover:shadow-sm
+            {% if p.stock == 0 %}bg-red-50 border-red-200
+            {% elif p.stock <= 2 %}bg-orange-50 border-orange-200
+            {% else %}bg-amber-50 border-amber-200{% endif %}">
+
+            <div class="flex items-center gap-1.5 mb-2">
+                <span class="w-2 h-2 rounded-full flex-shrink-0
+                    {% if p.stock == 0 %}bg-red-500
+                    {% elif p.stock <= 2 %}bg-orange-500
+                    {% else %}bg-amber-400{% endif %}">
+                </span>
+                <span class="text-xs font-semibold
+                    {% if p.stock == 0 %}text-red-600
+                    {% elif p.stock <= 2 %}text-orange-600
+                    {% else %}text-amber-600{% endif %}">
+                    {% if p.stock == 0 %}Agotado{% elif p.stock <= 2 %}Crítico{% else %}Bajo{% endif %}
+                </span>
             </div>
+
+            <p class="text-sm font-bold text-gray-900 truncate mb-1">{{ p.name|title }}</p>
+            <p class="text-xs text-gray-500 mb-3">
+                {% if p.stock == 0 %}Sin unidades{% else %}{{ p.stock }} en stock{% endif %}
+            </p>
+
             <a href="{{ url_for('inventory.product_edit', product_id=p.id) }}"
-               class="p-2 rounded-lg bg-white shadow-sm border border-gray-200 text-gray-500 hover:text-blue-600 hover:border-blue-300 transition-all">
-               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+               class="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-green-700 transition-colors">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                </svg>
+                Reponer stock
             </a>
         </div>
         {% endfor %}
@@ -164,4 +181,98 @@
 </div>
 {% endif %}
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Leemos los datos desde el HTML de forma limpia para que el editor no tire error
+const rawData = document.getElementById('chartData').dataset.weekly;
+const data = JSON.parse(rawData);
+
+const labels = data.map(d => d.day);
+const values = data.map(d => d.total);
+const maxVal = Math.max(...values, 1);
+
+const canvas = document.getElementById('salesChart');
+const ctx = canvas.getContext('2d');
+
+// Ajustar canvas al contenedor
+function resizeCanvas() {
+    const container = canvas.parentElement;
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
+    drawChart();
+}
+
+function formatNumber(n) {
+    return '$' + Math.round(n).toLocaleString('es-AR');
+}
+
+function drawChart() {
+    const W = canvas.width;
+    const H = canvas.height;
+    const padL = 60, padR = 20, padT = 30, padB = 40;
+    const chartW = W - padL - padR;
+    const chartH = H - padT - padB;
+    const barCount = values.length;
+    const barGap = chartW / barCount;
+    const barW = Math.min(barGap * 0.5, 36);
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Líneas guía horizontales
+    const steps = 4;
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = '#e5e7eb';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= steps; i++) {
+        const y = padT + (chartH / steps) * i;
+        ctx.beginPath();
+        ctx.moveTo(padL, y);
+        ctx.lineTo(W - padR, y);
+        ctx.stroke();
+
+        // Labels eje Y
+        const val = maxVal - (maxVal / steps) * i;
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#9ca3af';
+        ctx.font = '10px system-ui, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(formatNumber(val), padL - 6, y + 4);
+        ctx.setLineDash([4, 4]);
+    }
+    ctx.setLineDash([]);
+
+    // Barras
+    values.forEach((val, i) => {
+        const x = padL + i * barGap + (barGap - barW) / 2;
+        const barH = val > 0 ? Math.max((val / maxVal) * chartH, 3) : 3;
+        const y = padT + chartH - barH;
+
+        // Barra con color verde
+        const isToday = i === values.length - 1;
+        ctx.fillStyle = isToday ? '#16a34a' : '#bbf7d0';
+        ctx.beginPath();
+        ctx.roundRect(x, y, barW, barH, [4, 4, 0, 0]);
+        ctx.fill();
+
+        // Valor encima de la barra (solo si > 0)
+        if (val > 0) {
+            ctx.fillStyle = isToday ? '#15803d' : '#6b7280';
+            ctx.font = `${isToday ? 'bold ' : ''}10px system-ui, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText(formatNumber(val), x + barW / 2, y - 5);
+        }
+
+        // Label día
+        ctx.fillStyle = isToday ? '#16a34a' : '#6b7280';
+        ctx.font = `${isToday ? 'bold ' : ''}11px system-ui, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.fillText(labels[i], x + barW / 2, H - 8);
+    });
+}
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+</script>
 {% endblock %}

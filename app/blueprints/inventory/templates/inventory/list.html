@@ -5,58 +5,70 @@
 <div class="flex items-center justify-between mb-8">
     <div>
         <h1 class="text-2xl font-bold text-gray-900">Inventario</h1>
-        <p class="text-gray-500 mt-1">{{ products|length }} productos registrados</p>
+        <p class="text-gray-500 text-sm mt-1">{{ products|length }} producto{% if products|length != 1 %}s{% endif %} registrados</p>
     </div>
     <a href="{{ url_for('inventory.product_create') }}"
-       class="bg-blue-600 text-white font-medium px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center gap-2">
-        <span>+ Nuevo producto</span>
+       class="flex items-center gap-2 bg-green-600 text-white font-medium px-4 py-2.5 rounded-xl hover:bg-green-700 transition-colors text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Nuevo producto
     </a>
 </div>
 
-<div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+<div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
     <table class="w-full text-sm">
-        <thead class="bg-gray-50 border-b border-gray-200">
+        <thead class="bg-gray-50 border-b border-gray-100">
             <tr>
-                <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Producto</th>
-                <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">SKU</th>
-                <th class="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Costo</th>
-                <th class="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Venta</th>
-                <th class="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Margen</th>
-                <th class="text-center px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Stock</th>
-                <th class="px-6 py-3"></th>
+                <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Producto</th>
+                <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">SKU</th>
+                <th class="text-right px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Costo</th>
+                <th class="text-right px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Venta</th>
+                <th class="text-right px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Margen</th>
+                <th class="text-center px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Stock</th>
+                <th class="px-6 py-3.5"></th>
             </tr>
         </thead>
-        <tbody class="divide-y divide-gray-100">
+        <tbody class="divide-y divide-gray-50">
             {% for product in products %}
             <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-4 font-medium text-gray-900">{{ product.name }}</td>
-                <td class="px-6 py-4 text-gray-500 font-mono text-xs">{{ product.sku or '—' }}</td>
-                <td class="px-6 py-4 text-right text-gray-600">${{ "%.2f"|format(product.cost_price) }}</td>
-                <td class="px-6 py-4 text-right font-semibold">${{ "%.2f"|format(product.sale_price) }}</td>
-                <td class="px-6 py-4 text-right text-green-600 font-medium">${{ "%.2f"|format(product.profit_margin) }}</td>
+                <td class="px-6 py-4 font-semibold text-gray-900">{{ product.name }}</td>
+                <td class="px-6 py-4 text-gray-400 font-mono text-xs">{{ product.sku or '—' }}</td>
+                <td class="px-6 py-4 text-right text-gray-500">${{ "%.2f"|format(product.cost_price) }}</td>
+                <td class="px-6 py-4 text-right font-semibold text-gray-900">${{ "%.2f"|format(product.sale_price) }}</td>
+                <td class="px-6 py-4 text-right text-green-600 font-semibold">${{ "%.2f"|format(product.profit_margin) }}</td>
                 <td class="px-6 py-4 text-center">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                        {% if product.is_low_stock %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold
+                        {% if product.stock == 0 %}bg-red-100 text-red-700
+                        {% elif product.is_low_stock %}bg-amber-100 text-amber-700
+                        {% else %}bg-green-100 text-green-700{% endif %}">
+                        <span class="w-1.5 h-1.5 rounded-full
+                            {% if product.stock == 0 %}bg-red-500
+                            {% elif product.is_low_stock %}bg-amber-500
+                            {% else %}bg-green-500{% endif %}">
+                        </span>
                         {{ product.stock }}
-                        {% if product.is_low_stock %} ⚠{% endif %}
                     </span>
                 </td>
                 <td class="px-6 py-4 text-right">
                     <div class="flex items-center justify-end gap-3">
                         <a href="{{ url_for('inventory.product_edit', product_id=product.id) }}"
-                           class="text-blue-600 hover:underline text-xs font-medium">Editar</a>
+                           class="text-green-600 hover:underline text-xs font-semibold">Editar</a>
                         <form method="POST"
                               action="{{ url_for('inventory.product_delete', product_id=product.id) }}"
                               onsubmit="return confirm('¿Desactivar este producto?')">
-                            <button type="submit" class="text-red-500 hover:underline text-xs font-medium">Eliminar</button>
+                            <button type="submit" class="text-gray-400 hover:text-red-500 hover:underline text-xs font-medium">Eliminar</button>
                         </form>
                     </div>
                 </td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="7" class="px-6 py-12 text-center text-gray-400">
-                    No hay productos. <a href="{{ url_for('inventory.product_create') }}" class="text-blue-600 hover:underline">Creá el primero</a>
+                <td colspan="7" class="px-6 py-16 text-center">
+                    <p class="text-gray-400 mb-2">No hay productos registrados.</p>
+                    <a href="{{ url_for('inventory.product_create') }}" class="text-green-600 text-sm font-semibold hover:underline">
+                        Crear el primero →
+                    </a>
                 </td>
             </tr>
             {% endfor %}

@@ -1,105 +1,82 @@
 {% extends "base_app.html" %}
-{% block title %}Panel Principal{% endblock %}
+{% block title %}Mis Aplicaciones{% endblock %}
 
 {% block content %}
 
-<div class="flex items-center justify-between mb-8">
-    <div>
-        <h1 class="text-2xl font-bold text-gray-900">Bienvenido, {{ current_user.username }} 👋</h1>
-        <p class="text-gray-400 text-sm mt-0.5">{{ current_user.tenant.name }}</p>
-    </div>
-    <span class="bg-green-100 text-green-700 font-medium px-3 py-1 rounded-full text-sm">Plan {{ current_user.tenant.plan|capitalize }}</span>
+<!-- Header de bienvenida -->
+<div class="mb-10">
+    <h1 class="text-2xl font-bold text-gray-900">Hola, {{ current_user.username }} 👋</h1>
+    <p class="text-gray-500 mt-1 text-sm">{{ current_user.tenant.name }} · Bienvenido a tu espacio de trabajo</p>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <div class="lg:col-span-2 space-y-8">
-        
-        <section>
-            <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Mis Aplicaciones</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                {% for app in owned_apps %}
-                <div class="bg-white rounded-2xl border border-green-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-                    <div class="text-3xl mb-3">{{ app.icon }}</div>
-                    <h3 class="font-bold text-gray-900 text-lg mb-1">{{ app.name }}</h3>
-                    <p class="text-gray-500 text-sm mb-5">{{ app.description }}</p>
-                    <a href="{{ url_for('dashboard.gestion') }}"
-                       class="inline-flex items-center justify-center gap-2 bg-green-600 text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-green-700 transition-colors w-full">
-                        Abrir panel de control →
-                    </a>
-                </div>
-                {% endfor %}
-            </div>
-        </section>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            
-            <section class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                <h2 class="font-semibold text-gray-900 mb-4">Accesos rápidos</h2>
-                <div class="space-y-3">
-                    <a href="{{ url_for('dashboard.settings') }}" class="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-colors group">
-                        <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                            ⚙️
-                        </div>
-                        <div>
-                            <p class="text-sm font-bold text-gray-900">Configuración</p>
-                            <p class="text-xs text-gray-500">Ajustes del negocio</p>
-                        </div>
-                    </a>
-                    
-                    {% if current_user.is_admin %}
-                    <a href="{{ url_for('dashboard.employees') }}" class="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-colors group">
-                        <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center group-hover:bg-purple-100 transition-colors">
-                            👥
-                        </div>
-                        <div>
-                            <p class="text-sm font-bold text-gray-900">Equipo</p>
-                            <p class="text-xs text-gray-500">Gestionar empleados</p>
-                        </div>
-                    </a>
-                    {% endif %}
-                </div>
-            </section>
-
-            <section class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-    <h2 class="font-semibold text-gray-900 mb-4">Estado de la cuenta</h2>
-    <div class="space-y-4">
-        <div class="flex justify-between items-center pb-3 border-b border-gray-50">
-            <span class="text-sm text-gray-500">Plan actual</span>
-            <span class="text-sm font-bold text-green-600 bg-green-50 px-2.5 py-0.5 rounded-md">Plan {{ current_user.tenant.plan|capitalize }}</span>
-        </div>
-        <div class="flex justify-between items-center pb-3 border-b border-gray-50">
-            <span class="text-sm text-gray-500">Tu rol</span>
-            <span class="text-sm font-medium text-gray-900">{{ 'Administrador' if current_user.is_admin else 'Vendedor' }}</span>
-        </div>
+<!-- Mis Aplicaciones -->
+<section class="mb-12">
+    <div class="flex items-center gap-3 mb-5">
+        <h2 class="text-base font-bold text-gray-800">Mis Aplicaciones</h2>
+        <span class="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">Activas</span>
     </div>
-    <div class="mt-4 pt-4 border-t border-gray-50">
-        <a href="{{ url_for('public.contact') }}" class="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1">
-            ¿Necesitás ayuda? Contactar soporte
-        </a>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {% for app in owned_apps %}
+        <div class="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-md hover:border-green-200 transition-all group">
+            <div class="flex items-start justify-between mb-4">
+                <div class="text-3xl">{{ app.icon }}</div>
+                <span class="flex items-center gap-1.5 text-xs text-green-600 font-medium bg-green-50 px-2 py-1 rounded-full">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
+                    Activo
+                </span>
+            </div>
+            <h3 class="font-bold text-gray-900 text-base mb-1.5">{{ app.name }}</h3>
+            <p class="text-gray-500 text-sm mb-5 leading-relaxed">{{ app.description }}</p>
+            <a href="{{ url_for('dashboard.gestion') }}"
+               class="flex items-center justify-center gap-2 bg-green-600 text-white font-semibold px-4 py-2.5 rounded-xl
+                      hover:bg-green-700 transition-colors text-sm group-hover:shadow-sm">
+                Abrir
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                </svg>
+            </a>
+        </div>
+        {% endfor %}
     </div>
 </section>
 
-        </div>
+<!-- Próximamente -->
+<section>
+    <div class="flex items-center gap-3 mb-5">
+        <h2 class="text-base font-bold text-gray-800">Próximamente</h2>
+        <span class="bg-gray-100 text-gray-500 text-xs font-semibold px-2 py-0.5 rounded-full">En desarrollo</span>
     </div>
 
-    <div class="lg:col-span-1">
-        <section>
-            <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Próximamente</h2>
-            <div class="space-y-4">
-                {% for app in explore_apps %}
-                <div class="bg-gray-50 rounded-2xl border border-gray-200 p-5 opacity-75 grayscale cursor-not-allowed">
-                    <div class="text-2xl mb-2">{{ app.icon }}</div>
-                    <h3 class="font-bold text-gray-600 text-base mb-1">{{ app.name }}</h3>
-                    <p class="text-gray-400 text-xs mb-4">{{ app.description }}</p>
-                    <button disabled
-                       class="inline-flex items-center justify-center border border-gray-300 text-gray-400 bg-gray-100 font-semibold px-4 py-2 rounded-xl w-full text-sm">
-                        En mantenimiento
-                    </button>
-                </div>
-                {% endfor %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {% for app in explore_apps %}
+        <div class="bg-white rounded-2xl border border-dashed border-gray-200 p-6 opacity-70">
+            <div class="flex items-start justify-between mb-4">
+                <div class="text-3xl grayscale">{{ app.icon }}</div>
+                <span class="text-xs text-gray-400 font-medium bg-gray-100 px-2 py-1 rounded-full">Pronto</span>
             </div>
-        </section>
+            <h3 class="font-bold text-gray-600 text-base mb-1.5">{{ app.name }}</h3>
+            <p class="text-gray-400 text-sm mb-5 leading-relaxed">{{ app.description }}</p>
+            <a href="{{ url_for('public.contact') }}"
+               class="flex items-center justify-center gap-2 border border-gray-200 text-gray-500 font-semibold px-4 py-2.5 rounded-xl
+                      hover:bg-gray-50 transition-colors text-sm">
+                Notificarme
+            </a>
+        </div>
+        {% endfor %}
+
+        <!-- Tarjeta de soporte -->
+        <div class="bg-green-50 rounded-2xl border border-green-100 p-6">
+            <div class="text-3xl mb-4">💬</div>
+            <h3 class="font-bold text-gray-800 text-base mb-1.5">¿Necesitás ayuda?</h3>
+            <p class="text-gray-500 text-sm mb-5 leading-relaxed">Nuestro equipo responde por WhatsApp en minutos.</p>
+            <a href="{{ url_for('public.contact') }}"
+               class="flex items-center justify-center gap-2 bg-white border border-green-200 text-green-700 font-semibold px-4 py-2.5 rounded-xl
+                      hover:bg-green-600 hover:text-white hover:border-green-600 transition-all text-sm">
+                Contactar soporte
+            </a>
+        </div>
     </div>
-</div>
+</section>
 
 {% endblock %}
