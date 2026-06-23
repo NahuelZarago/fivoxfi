@@ -14,7 +14,7 @@ def login_required_with_tenant(f):
         if not current_user.has_role or not current_user.tenant_id:
             return redirect(url_for('auth.choose_role'))
         if not current_user.is_active:
-            flash('Tu cuenta fue desactivada. Contactá al administrador.', 'danger')
+            flash('Tu cuenta fue desactivada.', 'danger')
             return redirect(url_for('auth.login'))
         if not current_user.tenant.is_active:
             abort(403)
@@ -26,7 +26,7 @@ def owner_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_owner:
-            flash('Solo el dueño del negocio puede acceder a esta sección.', 'danger')
+            flash('Solo el dueño puede acceder.', 'danger')
             abort(403)
         return f(*args, **kwargs)
     return decorated_function

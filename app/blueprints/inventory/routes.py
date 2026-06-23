@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash, jsonify
+from flask import render_template, request, redirect, url_for, flash
 from flask_login import current_user
 from . import inventory_bp
 from ...extensions import db
@@ -10,9 +10,7 @@ from ...utils.decorators import login_required_with_tenant, admin_required
 @login_required_with_tenant
 @admin_required
 def product_list():
-    products = Product.query.filter_by(
-        tenant_id=current_user.tenant_id
-    ).order_by(Product.name).all()
+    products = Product.query.filter_by(tenant_id=current_user.tenant_id).order_by(Product.name).all()
     return render_template('inventory/list.html', products=products)
 
 
@@ -22,12 +20,9 @@ def product_list():
 def product_create():
     if request.method == 'POST':
         sku = request.form.get('sku', '').strip() or None
-
-        # Verificar SKU duplicado dentro del tenant
         if sku and Product.query.filter_by(tenant_id=current_user.tenant_id, sku=sku).first():
-            flash('Ya existe un producto con ese SKU/código de barra.', 'danger')
+            flash('Ya existe un producto con ese SKU.', 'danger')
             return render_template('inventory/form.html', product=None)
-
         product = Product(
             tenant_id=current_user.tenant_id,
             name=request.form.get('name', '').strip(),
@@ -39,9 +34,8 @@ def product_create():
         )
         db.session.add(product)
         db.session.commit()
-        flash(f'Producto "{product.name}" creado correctamente.', 'success')
+        flash(f'Producto "{product.name}" creado.', 'success')
         return redirect(url_for('inventory.product_list'))
-
     return render_template('inventory/form.html', product=None)
 
 
@@ -49,12 +43,7 @@ def product_create():
 @login_required_with_tenant
 @admin_required
 def product_edit(product_id):
-    # SIEMPRE filtrar por tenant_id para seguridad multi-tenant
-    product = Product.query.filter_by(
-        id=product_id,
-        tenant_id=current_user.tenant_id
-    ).first_or_404()
-
+    product = Product.query.filter_by(id=product_id, tenant_id=current_user.tenant_id).first_or_404()
     if request.method == 'POST':
         product.name = request.form.get('name', '').strip()
         product.description = request.form.get('description', '').strip()
@@ -63,9 +52,8 @@ def product_edit(product_id):
         product.sale_price = float(request.form.get('sale_price', 0))
         product.stock = int(request.form.get('stock', 0))
         db.session.commit()
-        flash(f'Producto "{product.name}" actualizado.', 'success')
+        flash(f'Producto actualizado.', 'success')
         return redirect(url_for('inventory.product_list'))
-
     return render_template('inventory/form.html', product=product)
 
 
@@ -73,11 +61,8 @@ def product_edit(product_id):
 @login_required_with_tenant
 @admin_required
 def product_delete(product_id):
-    product = Product.query.filter_by(
-        id=product_id,
-        tenant_id=current_user.tenant_id
-    ).first_or_404()
-    product.is_active = False  # Soft delete: preserva historial de ventas
+    product = Product.query.filter_by(id=product_id, tenant_id=current_user.tenant_id).first_or_404()
+    product.is_active = False
     db.session.commit()
-    flash(f'Producto "{product.name}" desactivado.', 'info')
+    flash(f'Producto desactivado.', 'info')
     return redirect(url_for('inventory.product_list'))
