@@ -3,107 +3,395 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fivox — Software para tu Negocio</title>
+    <title>Fivox — Software de gestión para negocios</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-white text-gray-900">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        * { font-family: 'Inter', sans-serif; }
 
-    <nav class="border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 bg-white z-10">
-        <div class="flex items-center gap-2">
-            <div class="w-7 h-7 bg-green-600 rounded-lg flex items-center justify-center">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        .gradient-hero {
+            background: linear-gradient(135deg, #052e16 0%, #14532d 40%, #166534 70%, #15803d 100%);
+        }
+        .card-hover {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .fade-in {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .stat-number {
+            background: linear-gradient(135deg, #16a34a, #4ade80);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .feature-icon {
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+        }
+        .nav-blur {
+            backdrop-filter: blur(12px);
+            background: rgba(255,255,255,0.92);
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+
+    <!-- NAV -->
+    <nav class="nav-blur border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center shadow-sm">
+                <svg class="w-4.5 h-4.5 text-white w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                 </svg>
             </div>
-            <span class="text-xl font-bold text-gray-900 tracking-tight">Fivox</span>
+            <span class="text-xl font-black text-gray-900 tracking-tight">Fivox</span>
+        </div>
+        <div class="hidden md:flex items-center gap-8">
+            <a href="#productos" class="text-sm text-gray-500 hover:text-gray-900 font-medium transition-colors">Productos</a>
+            <a href="#funciones" class="text-sm text-gray-500 hover:text-gray-900 font-medium transition-colors">Funciones</a>
+            <a href="#precios" class="text-sm text-gray-500 hover:text-gray-900 font-medium transition-colors">Precios</a>
+            <a href="{{ url_for('public.contact') }}" class="text-sm text-gray-500 hover:text-gray-900 font-medium transition-colors">Contacto</a>
         </div>
         <div class="flex items-center gap-3">
-            <a href="{{ url_for('public.contact') }}" class="text-sm text-gray-500 hover:text-gray-900">Contacto</a>
-            <a href="{{ url_for('auth.login') }}" class="text-sm text-gray-600 hover:text-gray-900 font-medium">Iniciar sesión</a>
+            <a href="{{ url_for('auth.login') }}" class="text-sm text-gray-600 hover:text-gray-900 font-semibold transition-colors">
+                Ingresar
+            </a>
             <a href="{{ url_for('auth.register') }}"
-               class="bg-green-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+               class="bg-green-600 text-white text-sm font-bold px-5 py-2.5 rounded-xl hover:bg-green-700 transition-all shadow-sm hover:shadow-md">
                 Empezar gratis
             </a>
         </div>
     </nav>
 
-    <section class="max-w-4xl mx-auto px-6 pt-24 pb-20 text-center">
-        <span class="inline-block bg-green-50 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-6 border border-green-100">
-            Software para negocios locales
-        </span>
-        <h1 class="text-5xl font-extrabold tracking-tight text-gray-900 mb-6 leading-tight">
-            Gestioná tu negocio<br>desde un solo lugar
-        </h1>
-        <p class="text-lg text-gray-500 max-w-xl mx-auto mb-10">
-            Inventario, ventas, reportes y equipo. Todo lo que necesitás, sin complicaciones.
-        </p>
-        <div class="flex flex-col sm:flex-row gap-3 justify-center">
-            <a href="{{ url_for('auth.register') }}"
-               class="bg-green-600 text-white font-bold px-8 py-3.5 rounded-xl hover:bg-green-700 transition-colors text-base shadow-sm">
-                Crear cuenta gratis
-            </a>
-            <a href="{{ url_for('public.contact') }}"
-               class="border border-gray-200 text-gray-700 font-semibold px-8 py-3.5 rounded-xl hover:bg-gray-50 transition-colors text-base">
-                Hablar con ventas
-            </a>
-        </div>
-    </section>
+    <!-- HERO -->
+    <section class="gradient-hero text-white px-6 pt-24 pb-32 relative overflow-hidden">
+        <!-- Círculos decorativos -->
+        <div class="absolute top-0 right-0 w-96 h-96 bg-green-400/10 rounded-full -mr-48 -mt-48 pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-64 h-64 bg-green-300/10 rounded-full -ml-32 -mb-32 pointer-events-none"></div>
 
-    <section class="bg-gray-50 py-20 px-6">
-        <div class="max-w-4xl mx-auto">
-            <h2 class="text-3xl font-bold text-center text-gray-900 mb-3">Nuestros productos</h2>
-            <p class="text-center text-gray-500 mb-12 text-sm">Soluciones pensadas para negocios reales</p>
+        <div class="max-w-5xl mx-auto text-center relative">
+            <div class="inline-flex items-center gap-2 bg-white/10 border border-white/20 px-4 py-1.5 rounded-full text-sm font-semibold mb-8 backdrop-blur-sm">
+                <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                Software para negocios locales argentinos
+            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-white rounded-2xl border border-gray-200 p-8 hover:border-green-200 hover:shadow-md transition-all">
-                    <div class="w-11 h-11 bg-green-100 rounded-xl flex items-center justify-center mb-5">
-                        <svg class="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                        </svg>
-                    </div>
-                    <div class="flex items-center gap-2 mb-3">
-                        <span class="text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">Disponible</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Sistema de Gestión</h3>
-                    <p class="text-gray-500 text-sm mb-6 leading-relaxed">
-                        Controlá tu inventario, registrá ventas en segundos y analizá tus ganancias con reportes automáticos.
-                    </p>
-                    <a href="{{ url_for('auth.register') }}"
-                       class="text-green-600 font-semibold text-sm hover:underline">Empezar ahora →</a>
+            <h1 class="text-5xl md:text-7xl font-black tracking-tight mb-6 leading-none">
+                Tu negocio,<br>
+                <span class="text-green-400">ordenado.</span>
+            </h1>
+
+            <p class="text-lg md:text-xl text-green-100 max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
+                Fivox es la plataforma de software para negocios locales. Inventario, ventas, reportes y equipo, todo desde una sola cuenta.
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+                <a href="{{ url_for('auth.register') }}"
+                   class="bg-white text-green-700 font-black px-8 py-4 rounded-2xl hover:bg-green-50 transition-all text-base shadow-xl hover:shadow-2xl">
+                    Crear cuenta gratis →
+                </a>
+                <a href="{{ url_for('public.contact') }}"
+                   class="border-2 border-white/30 text-white font-bold px-8 py-4 rounded-2xl hover:bg-white/10 transition-all text-base">
+                    Hablar con ventas
+                </a>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-3 gap-8 max-w-lg mx-auto border-t border-white/10 pt-12">
+                <div>
+                    <p class="text-3xl font-black text-white">100%</p>
+                    <p class="text-green-300 text-xs font-semibold mt-1 uppercase tracking-wider">Web, sin instalar</p>
                 </div>
-
-                <div class="bg-white rounded-2xl border border-dashed border-gray-200 p-8 opacity-60">
-                    <div class="w-11 h-11 bg-gray-100 rounded-xl flex items-center justify-center mb-5">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <span class="text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Próximamente</span>
-                    <h3 class="text-xl font-bold text-gray-700 mt-3 mb-2">Módulo de Reservas</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">
-                        Turnos y agenda online para peluquerías, consultorios y negocios por cita.
-                    </p>
+                <div>
+                    <p class="text-3xl font-black text-white">$0</p>
+                    <p class="text-green-300 text-xs font-semibold mt-1 uppercase tracking-wider">Para empezar</p>
+                </div>
+                <div>
+                    <p class="text-3xl font-black text-white">∞</p>
+                    <p class="text-green-300 text-xs font-semibold mt-1 uppercase tracking-wider">Productos</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="py-20 px-6 text-center">
-        <h2 class="text-2xl font-bold text-gray-900 mb-3">¿Tenés preguntas?</h2>
-        <p class="text-gray-500 mb-8 text-sm">Respondemos por WhatsApp al instante.</p>
-        <a href="{{ url_for('public.contact') }}"
-           class="inline-flex items-center gap-2.5 bg-green-600 text-white font-semibold px-7 py-3 rounded-xl hover:bg-green-700 transition-colors">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-            </svg>
-            Contactar por WhatsApp
-        </a>
+    <!-- PRODUCTOS -->
+    <section id="productos" class="py-24 px-6 bg-gray-50">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16 fade-in">
+                <span class="text-xs font-bold text-green-600 uppercase tracking-widest">Catálogo de productos</span>
+                <h2 class="text-4xl font-black text-gray-900 mt-3 mb-4">Elegí lo que necesita tu negocio</h2>
+                <p class="text-gray-500 max-w-xl mx-auto">Cada módulo de Fivox es un producto independiente. Pagás solo lo que usás.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                <!-- Producto 1: Sistema de Gestión — DISPONIBLE -->
+                <div class="bg-white rounded-3xl border-2 border-green-200 p-8 card-hover fade-in relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-green-50 rounded-full -mr-16 -mt-16 pointer-events-none"></div>
+                    <div class="relative">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <span class="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">Disponible</span>
+                        </div>
+                        <h3 class="text-xl font-black text-gray-900 mb-2">Sistema de Gestión</h3>
+                        <p class="text-gray-500 text-sm mb-6 leading-relaxed">
+                            Control total de tu negocio. Inventario, punto de venta, reportes de ganancias y gestión de empleados.
+                        </p>
+                        <ul class="space-y-2 mb-8">
+                            <li class="flex items-center gap-2 text-sm text-gray-600">
+                                <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                Inventario con alertas de stock
+                            </li>
+                            <li class="flex items-center gap-2 text-sm text-gray-600">
+                                <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                Punto de Venta (POS)
+                            </li>
+                            <li class="flex items-center gap-2 text-sm text-gray-600">
+                                <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                Reportes de ganancias diarias
+                            </li>
+                            <li class="flex items-center gap-2 text-sm text-gray-600">
+                                <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                Gestión de empleados
+                            </li>
+                        </ul>
+                        <a href="{{ url_for('auth.register') }}"
+                           class="block w-full bg-green-600 text-white text-center font-bold py-3 rounded-2xl hover:bg-green-700 transition-colors">
+                            Empezar gratis →
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Producto 2: Reservas — PRÓXIMAMENTE -->
+                <div class="bg-white rounded-3xl border border-gray-200 p-8 card-hover fade-in opacity-80">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <span class="bg-blue-50 text-blue-500 text-xs font-bold px-3 py-1 rounded-full border border-blue-100">Próximamente</span>
+                    </div>
+                    <h3 class="text-xl font-black text-gray-700 mb-2">Módulo de Reservas</h3>
+                    <p class="text-gray-400 text-sm mb-6 leading-relaxed">
+                        Agenda online con turnos automáticos. Ideal para peluquerías, consultorios y cualquier negocio por cita.
+                    </p>
+                    <ul class="space-y-2 mb-8">
+                        <li class="flex items-center gap-2 text-sm text-gray-400"><svg class="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Reservas 24/7</li>
+                        <li class="flex items-center gap-2 text-sm text-gray-400"><svg class="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Recordatorios automáticos</li>
+                        <li class="flex items-center gap-2 text-sm text-gray-400"><svg class="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Gestión de agenda</li>
+                    </ul>
+                    <a href="{{ url_for('public.contact') }}"
+                       class="block w-full border border-gray-200 text-gray-400 text-center font-bold py-3 rounded-2xl hover:bg-gray-50 transition-colors">
+                        Avisame cuando esté →
+                    </a>
+                </div>
+
+                <!-- Producto 3: Tienda Online — PRÓXIMAMENTE -->
+                <div class="bg-white rounded-3xl border border-gray-200 p-8 card-hover fade-in opacity-80">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                            </svg>
+                        </div>
+                        <span class="bg-purple-50 text-purple-500 text-xs font-bold px-3 py-1 rounded-full border border-purple-100">Próximamente</span>
+                    </div>
+                    <h3 class="text-xl font-black text-gray-700 mb-2">Tienda Online</h3>
+                    <p class="text-gray-400 text-sm mb-6 leading-relaxed">
+                        Tu catálogo en internet. Los clientes ven tus productos y vos recibís los pedidos directamente.
+                    </p>
+                    <ul class="space-y-2 mb-8">
+                        <li class="flex items-center gap-2 text-sm text-gray-400"><svg class="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Catálogo sincronizado</li>
+                        <li class="flex items-center gap-2 text-sm text-gray-400"><svg class="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Pedidos por WhatsApp</li>
+                        <li class="flex items-center gap-2 text-sm text-gray-400"><svg class="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Link compartible</li>
+                    </ul>
+                    <a href="{{ url_for('public.contact') }}"
+                       class="block w-full border border-gray-200 text-gray-400 text-center font-bold py-3 rounded-2xl hover:bg-gray-50 transition-colors">
+                        Avisame cuando esté →
+                    </a>
+                </div>
+            </div>
+        </div>
     </section>
 
-    <footer class="border-t border-gray-100 py-8 px-6 text-center text-xs text-gray-400">
-        © 2025 Fivox. Todos los derechos reservados.
+    <!-- FUNCIONES -->
+    <section id="funciones" class="py-24 px-6 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16 fade-in">
+                <span class="text-xs font-bold text-green-600 uppercase tracking-widest">Sistema de Gestión</span>
+                <h2 class="text-4xl font-black text-gray-900 mt-3 mb-4">Todo lo que necesitás para vender</h2>
+                <p class="text-gray-500 max-w-xl mx-auto">Sin planillas de Excel. Sin confusiones. Con Fivox sabés exactamente cómo va tu negocio.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="p-6 rounded-2xl bg-gray-50 fade-in">
+                    <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                    </div>
+                    <h4 class="font-black text-gray-900 mb-2">Inventario inteligente</h4>
+                    <p class="text-gray-500 text-sm leading-relaxed">Cargá tus productos con precio de costo y venta. Te avisa cuando el stock está por terminarse.</p>
+                </div>
+
+                <div class="p-6 rounded-2xl bg-gray-50 fade-in">
+                    <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    </div>
+                    <h4 class="font-black text-gray-900 mb-2">Punto de Venta (POS)</h4>
+                    <p class="text-gray-500 text-sm leading-relaxed">Registrá ventas en segundos. Buscá por nombre o código de barra. Efectivo, tarjeta o transferencia.</p>
+                </div>
+
+                <div class="p-6 rounded-2xl bg-gray-50 fade-in">
+                    <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    </div>
+                    <h4 class="font-black text-gray-900 mb-2">Reportes de ganancias</h4>
+                    <p class="text-gray-500 text-sm leading-relaxed">Sabé cuánto ganaste hoy, esta semana y este mes. Con desglose por método de pago.</p>
+                </div>
+
+                <div class="p-6 rounded-2xl bg-gray-50 fade-in">
+                    <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </div>
+                    <h4 class="font-black text-gray-900 mb-2">Equipo con roles</h4>
+                    <p class="text-gray-500 text-sm leading-relaxed">Agregá empleados con un código único. Los vendedores solo ven el POS; vos ves todo.</p>
+                </div>
+
+                <div class="p-6 rounded-2xl bg-gray-50 fade-in">
+                    <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    </div>
+                    <h4 class="font-black text-gray-900 mb-2">Verificación por email</h4>
+                    <p class="text-gray-500 text-sm leading-relaxed">Tu cuenta está protegida. Cada usuario verifica su email antes de acceder al sistema.</p>
+                </div>
+
+                <div class="p-6 rounded-2xl bg-green-600 fade-in">
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                    <h4 class="font-black text-white mb-2">Listo en 2 minutos</h4>
+                    <p class="text-green-100 text-sm leading-relaxed">Sin instalar nada. Entrás desde cualquier navegador y empezás a cargar productos al instante.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRECIOS -->
+    <section id="precios" class="py-24 px-6 bg-gray-50">
+        <div class="max-w-4xl mx-auto text-center">
+            <div class="fade-in mb-16">
+                <span class="text-xs font-bold text-green-600 uppercase tracking-widest">Precios</span>
+                <h2 class="text-4xl font-black text-gray-900 mt-3 mb-4">Simple y sin sorpresas</h2>
+                <p class="text-gray-500">Empezá gratis. Cuando tu negocio crezca, nosotros crecemos con vos.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+                <!-- Free -->
+                <div class="bg-white rounded-3xl border border-gray-200 p-8 text-left card-hover fade-in">
+                    <p class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Gratis</p>
+                    <p class="text-5xl font-black text-gray-900 mb-1">$0</p>
+                    <p class="text-gray-400 text-sm mb-8">Para siempre</p>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center gap-2 text-sm text-gray-600"><svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Sistema de Gestión completo</li>
+                        <li class="flex items-center gap-2 text-sm text-gray-600"><svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Productos ilimitados</li>
+                        <li class="flex items-center gap-2 text-sm text-gray-600"><svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Hasta 3 empleados</li>
+                        <li class="flex items-center gap-2 text-sm text-gray-600"><svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Reportes básicos</li>
+                    </ul>
+                    <a href="{{ url_for('auth.register') }}" class="block w-full border-2 border-green-600 text-green-600 text-center font-black py-3.5 rounded-2xl hover:bg-green-50 transition-colors">
+                        Empezar ahora
+                    </a>
+                </div>
+
+                <!-- Pro -->
+                <div class="bg-gray-900 rounded-3xl p-8 text-left card-hover fade-in relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-40 h-40 bg-green-500/10 rounded-full -mr-20 -mt-20 pointer-events-none"></div>
+                    <div class="relative">
+                        <div class="flex items-center gap-2 mb-4">
+                            <p class="text-sm font-bold text-green-400 uppercase tracking-wider">Pro</p>
+                            <span class="bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">Próximamente</span>
+                        </div>
+                        <p class="text-5xl font-black text-white mb-1">Pronto</p>
+                        <p class="text-gray-400 text-sm mb-8">Precio por confirmar</p>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-center gap-2 text-sm text-gray-300"><svg class="w-4 h-4 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Todo el plan Gratis</li>
+                            <li class="flex items-center gap-2 text-sm text-gray-300"><svg class="w-4 h-4 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Empleados ilimitados</li>
+                            <li class="flex items-center gap-2 text-sm text-gray-300"><svg class="w-4 h-4 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Módulos adicionales</li>
+                            <li class="flex items-center gap-2 text-sm text-gray-300"><svg class="w-4 h-4 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Soporte prioritario</li>
+                        </ul>
+                        <a href="{{ url_for('public.contact') }}" class="block w-full bg-green-600 text-white text-center font-black py-3.5 rounded-2xl hover:bg-green-500 transition-colors">
+                            Notificarme
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA FINAL -->
+    <section class="py-24 px-6 bg-white">
+        <div class="max-w-3xl mx-auto text-center fade-in">
+            <h2 class="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight">
+                Tu negocio merece<br>una herramienta seria.
+            </h2>
+            <p class="text-gray-500 text-lg mb-10">Empezá hoy. Es gratis y no necesitás tarjeta de crédito.</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{{ url_for('auth.register') }}"
+                   class="bg-green-600 text-white font-black px-10 py-4 rounded-2xl hover:bg-green-700 transition-all text-lg shadow-lg hover:shadow-xl">
+                    Crear cuenta gratis →
+                </a>
+                <a href="{{ url_for('public.contact') }}"
+                   class="flex items-center justify-center gap-2.5 border-2 border-gray-200 text-gray-700 font-bold px-8 py-4 rounded-2xl hover:border-gray-300 hover:bg-gray-50 transition-all text-base">
+                    <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                    Hablar por WhatsApp
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-gray-100 py-10 px-6">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <div class="w-7 h-7 bg-green-600 rounded-lg flex items-center justify-center">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                    </svg>
+                </div>
+                <span class="font-black text-gray-900">Fivox</span>
+                <span class="text-gray-400 text-sm ml-2">© 2025 · Todos los derechos reservados</span>
+            </div>
+            <div class="flex items-center gap-6">
+                <a href="{{ url_for('auth.login') }}" class="text-sm text-gray-400 hover:text-gray-700 transition-colors">Ingresar</a>
+                <a href="{{ url_for('auth.register') }}" class="text-sm text-gray-400 hover:text-gray-700 transition-colors">Registrarse</a>
+                <a href="{{ url_for('public.contact') }}" class="text-sm text-gray-400 hover:text-gray-700 transition-colors">Contacto</a>
+            </div>
+        </div>
     </footer>
+
+    <script>
+        // Scroll reveal
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+    </script>
 </body>
 </html>
