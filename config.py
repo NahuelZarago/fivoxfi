@@ -18,9 +18,7 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ.get(
-        'DEV_DATABASE_URL',
-        'postgresql://postgres:password@localhost:5432/saas_hub_dev'
-    )
+        'DEV_DATABASE_URL',)
 
 
 class ProductionConfig(Config):
