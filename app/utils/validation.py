@@ -104,3 +104,21 @@ def validate_password(raw):
     if not re.search(r'[A-Za-z]', password) or not re.search(r'\d', password):
         raise ValidationFailure('La contraseña debe incluir al menos una letra y un número.')
     return password
+
+
+def password_checks(raw):
+    """
+    Criterios que muestra el medidor de contraseña (el JS de auth-forms.js usa los mismos).
+    Devuelve (score 0-6, dict de criterios cumplidos). Solo orienta al usuario:
+    lo obligatorio lo decide validate_password.
+    """
+    password = str(raw or '')
+    checks = {
+        'length': len(password) >= 8,
+        'long': len(password) >= 12,
+        'lower': bool(re.search(r'[a-z]', password)),
+        'upper': bool(re.search(r'[A-Z]', password)),
+        'digit': bool(re.search(r'\d', password)),
+        'symbol': bool(re.search(r'[^A-Za-z0-9]', password)),
+    }
+    return sum(checks.values()), checks

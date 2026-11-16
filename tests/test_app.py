@@ -384,3 +384,80 @@ def test_production_config_requires_strong_secret(monkeypatch):
     with pytest.raises(RuntimeError):
         create = __import__('app').create_app
         create('production')
+
+
+# ── registro con errores por campo ─────────────────────────
+def test_register_shows_all_field_errors_inline(client):
+    r = client.post('/auth/registro', data={'username': '', 'email': 'malo', 'password': 'corta',
+                                            'confirm_password': 'otra'})
+    html = r.get_data(as_text=True)
+    assert r.status_code == 400
+    assert 'El nombre es obligatorio.' in html
+    assert 'Ingresá un email válido' in html
+    assert 'al menos 8 caracteres' in html
+    assert User.query.count() == 0
+
+
+def test_register_password_mismatch_and_duplicate_email(client, shop):
+    r = client.post('/auth/registro', data={'username': 'Ana', 'email': 'nuevo@x.com', 'password': 'Clave1234',
+                                            'confirm_password': 'Clave9999'})
+    assert r.status_code == 400 and 'Las contraseñas no coinciden.' in r.get_data(as_text=True)
+    r = client.post('/auth/registro', data={'username': 'Ana', 'email': shop['owner'].email, 'password': 'Clave1234',
+                                            'confirm_password': 'Clave1234'})
+    assert r.status_code == 400 and 'Ya existe una cuenta' in r.get_data(as_text=True)
+
+
+def test_register_ok_creates_user_and_logs_in(client, app):
+    r = client.post('/auth/registro', data={'username': 'Ana', 'email': 'ana@x.com', 'password': 'Clave1234',
+                                            'confirm_password': 'Clave1234'})
+    assert r.status_code == 302 and r.headers['Location'].endswith('/auth/verificacion-pendiente')
+    assert User.query.filter_by(email='ana@x.com').one().username == 'Ana'
+
+
+def test_login_error_is_inline_not_flash(client, shop):
+    r = login(client, shop['owner'], password='mala')
+    html = r.get_data(as_text=True)
+    assert r.status_code == 401 and 'Email o contraseña incorrectos.' in html and 'fixed top-4' not in html
+
+
+# ── eliminar negocio ───────────────────────────────────────
+def test_delete_business_requires_exact_name_and_password(client, shop):
+    login(client, shop['owner'])
+    tid = shop['tenant'].id
+    client.post('/app/dashboard/configuracion/eliminar-negocio', data={'confirm_name': 'otro', 'password': PASSWORD})
+    client.post('/app/dashboard/configuracion/eliminar-negocio', data={'confirm_name': shop['tenant'].name, 'password': 'mala'})
+    assert db.session.get(Tenant, tid) is not None
+
+
+def test_employee_cannot_delete_business(client, shop):
+    login(client, shop['employee'])
+    r = client.post('/app/dashboard/configuracion/eliminar-negocio',
+                    data={'confirm_name': shop['tenant'].name, 'password': PASSWORD})
+    assert r.status_code == 403 and db.session.get(Tenant, shop['tenant'].id) is not None
+
+
+def test_delete_business_removes_data_and_detaches_people(client, shop):
+    other = make_tenant('Otro')
+    keep = make_product(other, 'Intacto', stock=4)
+    pid = shop['product'].id
+    login(client, shop['employee'])
+    sale(client, [{'product_id': pid, 'quantity': 2}])
+    client.post('/auth/logout')
+    login(client, shop['owner'])
+    name, tid = shop['tenant'].name, shop['tenant'].id
+    r = client.post('/app/dashboard/configuracion/eliminar-negocio', data={'confirm_name': name, 'password': PASSWORD})
+    assert r.status_code == 302 and '/auth/login' in r.headers['Location']
+    db.session.expire_all()
+    assert db.session.get(Tenant, tid) is None
+    assert Product.query.filter_by(tenant_id=tid).count() == 0
+    assert Sale.query.filter_by(tenant_id=tid).count() == 0
+    assert StockMovement.query.filter_by(tenant_id=tid).count() == 0
+    # Las cuentas siguen existiendo, sin negocio ni rol
+    for key in ('owner', 'employee', 'client'):
+        u = db.session.get(User, shop[key].id)
+        assert u is not None and u.tenant_id is None and u.role is None
+    # El otro negocio quedó intacto
+    assert db.session.get(Product, keep.id).stock == 4
+    # El dueño puede volver a entrar y registrar otro negocio
+    r = login(client, shop['owner'])
+    assert r.headers['Location'].endswith('/auth/elegir-rol')

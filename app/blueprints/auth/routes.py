@@ -41,21 +41,33 @@ def register():
     if current_user.is_authenticated:
         return _after_auth_redirect(current_user)
 
-    form = {}
+    form, errors = {}, {}
     if request.method == 'POST':
         form = {'username': request.form.get('username', ''), 'email': request.form.get('email', '')}
-        try:
-            username = clean_text(form['username'], 'Nombre', max_len=80)
-            email = validate_email(form['email'])
-            password = request.form.get('password', '')
-            validate_password(password)
-            if password != request.form.get('confirm_password', ''):
-                raise ValidationFailure('Las contraseñas no coinciden.')
-            if User.query.filter_by(email=email).first():
-                raise ValidationFailure('Ya existe una cuenta con ese email. ¿Querés iniciar sesión?')
-        except ValidationFailure as exc:
-            flash(str(exc), 'danger')
-            return render_template('auth/register.html', form=form), 400
+        password = request.form.get('password', '')
+        username = email = None
+
+        # Cada campo se valida por separado para mostrar TODOS los errores a la vez, debajo de cada uno.
+        for key, check in (
+            ('username', lambda: clean_text(form['username'], 'El nombre', max_len=80)),
+            ('email', lambda: validate_email(form['email'])),
+            ('password', lambda: validate_password(password)),
+        ):
+            try:
+                value = check()
+                if key == 'username':
+                    username = value
+                elif key == 'email':
+                    email = value
+            except ValidationFailure as exc:
+                errors[key] = str(exc)
+        if 'password' not in errors and password != request.form.get('confirm_password', ''):
+            errors['confirm_password'] = 'Las contraseñas no coinciden.'
+        if email and 'email' not in errors and User.query.filter_by(email=email).first():
+            errors['email'] = 'Ya existe una cuenta con ese email. ¿Querés iniciar sesión?'
+
+        if errors:
+            return render_template('auth/register.html', form=form, errors=errors), 400
 
         user = User(email=email, username=username)
         user.set_password(password)
@@ -72,7 +84,7 @@ def register():
             flash('Podés reintentar el envío desde esta pantalla.', 'info')
         return redirect(url_for('auth.pending_verification'))
 
-    return render_template('auth/register.html', form=form)
+    return render_template('auth/register.html', form=form, errors=errors)
 
 
 # ─── VERIFICACIÓN DE EMAIL ──────────────────────────────────
@@ -188,11 +200,11 @@ def login():
         valid = check_password_hash(user.password_hash if user else _DUMMY_HASH, password) and user is not None
 
         if not valid:
-            flash('Email o contraseña incorrectos.', 'danger')
-            return render_template('auth/login.html', email=email), 401
+            return render_template('auth/login.html', email=email,
+                                   error='Email o contraseña incorrectos.'), 401
         if not user.is_active:
-            flash('Tu cuenta fue desactivada. Contactá al dueño del negocio.', 'danger')
-            return render_template('auth/login.html', email=email), 403
+            return render_template('auth/login.html', email=email,
+                                   error='Tu cuenta fue desactivada. Contactá al dueño del negocio.'), 403
 
         login_user(user, remember=bool(request.form.get('remember')))
         rotate_csrf_token()
@@ -202,7 +214,7 @@ def login():
         fallback = url_for(home_endpoint(user.role))
         return redirect(safe_next_url(request.args.get('next'), fallback))
 
-    return render_template('auth/login.html', email='')
+    return render_template('auth/login.html', email='', error=None)
 
 
 @auth_bp.route('/logout', methods=['POST'])
@@ -248,12 +260,12 @@ def reset_password(token):
             if password != request.form.get('confirm_password', ''):
                 raise ValidationFailure('Las contraseñas no coinciden.')
         except ValidationFailure as exc:
-            flash(str(exc), 'danger')
-            return render_template('auth/reset_password.html', token=token), 400
+            field = 'confirm_password' if 'coinciden' in str(exc) else 'password'
+            return render_template('auth/reset_password.html', token=token, errors={field: str(exc)}), 400
         user.set_password(password)
         user.auth_version += 1          # Invalida el enlace usado y todas las sesiones abiertas
         user.is_email_confirmed = True  # Recibió un email en esa casilla: queda verificado
         db.session.commit()
         flash('Contraseña actualizada. Ya podés iniciar sesión.', 'success')
         return redirect(url_for('auth.login'))
-    return render_template('auth/reset_password.html', token=token)
+    return render_template('auth/reset_password.html', token=token, errors={})

@@ -79,3 +79,32 @@ def regenerate_code(tenant, kind):
         except IntegrityError:
             db.session.rollback()
     raise ValidationFailure('No se pudo generar un código nuevo. Intentá de nuevo.')
+
+
+def delete_tenant(tenant):
+    """
+    Elimina el negocio y TODOS sus datos (productos, ventas, movimientos). Irreversible.
+    Las personas del equipo (empleados, clientes y el propio dueño) NO se borran: quedan sin
+    negocio, con la sesión cerrada, y pueden unirse a otro o registrar uno nuevo.
+    Todo en una sola transacción: o se borra todo o no se borra nada.
+    """
+    from ..models.product import Product
+    from ..models.sale import Sale, SaleItem
+    from ..models.stock_movement import StockMovement
+
+    tid = tenant.id
+    try:
+        sale_ids = db.session.query(Sale.id).filter(Sale.tenant_id == tid)
+        StockMovement.query.filter_by(tenant_id=tid).delete(synchronize_session=False)
+        SaleItem.query.filter(SaleItem.sale_id.in_(sale_ids)).delete(synchronize_session=False)
+        Sale.query.filter_by(tenant_id=tid).delete(synchronize_session=False)
+        Product.query.filter_by(tenant_id=tid).delete(synchronize_session=False)
+        # auth_version + 1 cierra las sesiones abiertas de todo el equipo
+        User.query.filter_by(tenant_id=tid).update(
+            {User.tenant_id: None, User.role: None, User.auth_version: User.auth_version + 1},
+            synchronize_session=False)
+        Tenant.query.filter_by(id=tid).delete(synchronize_session=False)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise

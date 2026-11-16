@@ -1,4 +1,5 @@
 {% extends "base_app.html" %}
+{% from '_macros.html' import field_error, password_meter %}
 {% block title %}Configuración{% endblock %}
 {% block content %}
 <h1 class="text-2xl font-bold mb-6">Configuración</h1>
@@ -13,14 +14,16 @@
         <button class="bg-green-600 text-white font-semibold px-4 py-2 rounded-xl hover:bg-green-700 text-sm">Guardar</button>
     </form>
 
-    <form method="POST" action="{{ url_for('dashboard.settings_update') }}" class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
+    <form method="POST" action="{{ url_for('dashboard.settings_update') }}" data-auth-form novalidate class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
         {{ csrf_input() }}<input type="hidden" name="action" value="password">
         <h2 class="font-bold">Cambiar contraseña</h2>
         <div><label class="block text-sm font-medium mb-1.5" for="current_password">Contraseña actual</label>
-            <input id="current_password" type="password" name="current_password" required autocomplete="current-password" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"></div>
+            <input id="current_password" type="password" name="current_password" required autocomplete="current-password" data-label="La contraseña actual" data-toggle class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            {{ field_error({}, 'current_password') }}</div>
         <div><label class="block text-sm font-medium mb-1.5" for="new_password">Nueva contraseña</label>
-            <input id="new_password" type="password" name="new_password" required minlength="8" maxlength="128" autocomplete="new-password" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
-            <p class="text-xs text-gray-400 mt-1">Mínimo 8 caracteres, con letras y números.</p></div>
+            <input id="new_password" type="password" name="new_password" required maxlength="128" autocomplete="new-password" data-label="La nueva contraseña" data-strength data-toggle class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            {{ field_error({}, 'new_password') }}
+            {{ password_meter('new_password') }}</div>
         <button class="bg-green-600 text-white font-semibold px-4 py-2 rounded-xl hover:bg-green-700 text-sm">Cambiar contraseña</button>
     </form>
 
@@ -35,6 +38,26 @@
     </form>
     {% endif %}
 
+    {% if can('business.settings') %}
+    <form method="POST" action="{{ url_for('dashboard.delete_business') }}" id="deleteForm"
+          class="lg:col-span-2 bg-white rounded-2xl border-2 border-red-200 p-6 space-y-4">
+        {{ csrf_input() }}
+        <h2 class="font-bold text-red-700">Zona de peligro: eliminar negocio</h2>
+        <p class="text-sm text-gray-600">Se borran <strong>para siempre</strong> los productos, las ventas y el historial de stock de <strong>{{ current_user.tenant.name }}</strong>. No se puede deshacer. Tu equipo y vos conservan sus cuentas, pero quedan sin negocio y se cierran sus sesiones.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+                <label class="block text-sm font-medium mb-1.5" for="confirm_name">Escribí el nombre del negocio para confirmar</label>
+                <input id="confirm_name" name="confirm_name" autocomplete="off" data-expected="{{ current_user.tenant.name }}" placeholder="{{ current_user.tenant.name }}" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 bg-gray-50">
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1.5" for="delete_password">Tu contraseña</label>
+                <input id="delete_password" type="password" name="password" autocomplete="current-password" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 bg-gray-50">
+            </div>
+        </div>
+        <button id="deleteBtn" type="submit" disabled class="bg-red-600 text-white font-semibold px-4 py-2 rounded-xl hover:bg-red-700 text-sm disabled:opacity-40 disabled:cursor-not-allowed">Eliminar negocio definitivamente</button>
+    </form>
+    {% endif %}
+
     <div class="bg-white rounded-2xl border border-gray-200 p-6">
         <h2 class="font-bold mb-2">Ayuda</h2>
         <p class="text-sm text-gray-500 mb-4">¿Algo no funciona? Escribinos y te ayudamos.</p>
@@ -42,4 +65,18 @@
            class="inline-block border border-gray-300 font-semibold px-4 py-2 rounded-xl hover:bg-gray-50 text-sm">Contactar soporte por WhatsApp</a>
     </div>
 </div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/auth-forms.js') }}"></script>
+<script>
+(function () {
+    var name = document.getElementById('confirm_name'), pass = document.getElementById('delete_password'), btn = document.getElementById('deleteBtn');
+    if (!name) return;
+    function sync() { btn.disabled = !(name.value.trim() === name.dataset.expected && pass.value); }
+    name.addEventListener('input', sync); pass.addEventListener('input', sync);
+    document.getElementById('deleteForm').addEventListener('submit', function (e) {
+        if (!confirm('¿Seguro? Esto elimina el negocio y todos sus datos de forma definitiva.')) e.preventDefault();
+    });
+})();
+</script>
 {% endblock %}

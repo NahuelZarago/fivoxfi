@@ -5,6 +5,8 @@ services:
       POSTGRES_USER: fivox
       POSTGRES_PASSWORD: fivox
       POSTGRES_DB: fivox
+    # Solo accesible desde tu PC (127.0.0.1), puerto 5433 para no chocar con un Postgres local.
+    ports: ["127.0.0.1:5433:5432"]
     volumes: [pgdata:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U fivox"]

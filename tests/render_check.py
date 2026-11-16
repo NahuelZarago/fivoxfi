@@ -74,9 +74,9 @@ member = NS(id=2, username='Luis', email='l@x.com', role_label='Empleado', is_ac
 
 cases = [
     ('public/index.html', {}, 'owner'), ('public/contact.html', {}, 'owner'), ('public/product_landing.html', {'slug': 's'}, 'owner'),
-    ('auth/login.html', {'email': 'a@b.com'}, 'owner'), ('auth/register.html', {'form': {'username': 'x', 'email': 'y'}}, 'owner'),
+    ('auth/login.html', {'email': 'a@b.com', 'error': None}, 'owner'), ('auth/login.html', {'email': 'a@b.com', 'error': 'Email o contraseña incorrectos.'}, 'owner'), ('auth/register.html', {'form': {'username': 'x', 'email': 'y'}, 'errors': {}}, 'owner'), ('auth/register.html', {'form': {'username': '', 'email': 'y'}, 'errors': {'username': 'El nombre es obligatorio.', 'email': 'Email inválido', 'password': 'x', 'confirm_password': 'y'}}, 'owner'),
     ('auth/choose_role.html', {}, 'owner'), ('auth/join.html', {}, 'owner'), ('auth/setup_owner.html', {}, 'owner'),
-    ('auth/pending_verification.html', {}, 'owner'), ('auth/forgot_password.html', {}, 'owner'), ('auth/reset_password.html', {'token': 't'}, 'owner'),
+    ('auth/pending_verification.html', {}, 'owner'), ('auth/forgot_password.html', {}, 'owner'), ('auth/reset_password.html', {'token': 't', 'errors': {}}, 'owner'), ('auth/reset_password.html', {'token': 't', 'errors': {'password': 'corta'}}, 'owner'),
     ('email/verify.html', {'username': 'Ana', 'url': 'http://x/y'}, 'owner'), ('email/reset.html', {'username': 'Ana', 'url': 'http://x/y'}, 'owner'),
     ('errors/error.html', {'code': 404, 'title': 'No', 'message': 'm', 'authenticated': True}, 'owner'),
     ('dashboard/index.html', {}, 'owner'), ('dashboard/index.html', {}, 'employee'), ('dashboard/index.html', {}, 'client'),

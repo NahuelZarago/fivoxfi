@@ -1,27 +1,35 @@
 {% extends 'base_auth.html' %}
+{% from '_macros.html' import field_error, password_meter %}
 {% block title %}Crear cuenta{% endblock %}
-{% block subtitle %}<p class="text-gray-500 text-sm">Creá tu cuenta para empezar</p>{% endblock %}
+{% block width %}max-w-md{% endblock %}
+{% block subtitle %}<p class="text-gray-500 text-sm">Creá tu cuenta en menos de un minuto</p>{% endblock %}
 {% block content %}
-<div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
-    <h2 class="text-lg font-bold text-gray-900 mb-6">Crear cuenta</h2>
-    <form method="POST" class="space-y-4">
+<div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8">
+    <h2 class="text-lg font-bold text-gray-900 mb-1">Crear cuenta</h2>
+    <p class="text-sm text-gray-500 mb-6">Después elegís si registrás tu empresa o te unís con un código.</p>
+    <form method="POST" data-auth-form novalidate class="space-y-5">
         {{ csrf_input() }}
         <div>
             <label for="username" class="block text-sm font-medium text-gray-700 mb-1.5">Tu nombre</label>
-            <input id="username" name="username" required maxlength="80" autocomplete="name" value="{{ form.get('username', '') }}" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            <input id="username" name="username" required maxlength="80" autocomplete="name" data-label="El nombre" value="{{ form.get('username', '') }}" placeholder="Ej: Ana Pérez" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            {{ field_error(errors, 'username') }}
         </div>
         <div>
             <label for="email" class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
-            <input id="email" type="email" name="email" required maxlength="120" autocomplete="email" value="{{ form.get('email', '') }}" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            <input id="email" type="email" name="email" required maxlength="120" autocomplete="email" data-label="El email" value="{{ form.get('email', '') }}" placeholder="tu@email.com" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            {{ field_error(errors, 'email') }}
         </div>
         <div>
             <label for="password" class="block text-sm font-medium text-gray-700 mb-1.5">Contraseña</label>
-            <input id="password" type="password" name="password" required minlength="8" maxlength="128" autocomplete="new-password" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
-            <p class="text-xs text-gray-400 mt-1">Mínimo 8 caracteres, con letras y números.</p>
+            <input id="password" type="password" name="password" required maxlength="128" autocomplete="new-password" data-label="La contraseña" data-strength data-toggle class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            {{ field_error(errors, 'password') }}
+            {{ password_meter('password') }}
+            <p class="text-xs text-gray-400 mt-1.5">Obligatorio: 8 caracteres, una letra y un número. Cuantos más requisitos cumplas, más segura.</p>
         </div>
         <div>
             <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-1.5">Repetir contraseña</label>
-            <input id="confirm_password" type="password" name="confirm_password" required autocomplete="new-password" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            <input id="confirm_password" type="password" name="confirm_password" required autocomplete="new-password" data-label="La confirmación" data-match="#password" data-toggle class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            {{ field_error(errors, 'confirm_password') }}
         </div>
         <button type="submit" class="w-full bg-green-600 text-white font-semibold py-3 rounded-xl hover:bg-green-700 transition-colors text-sm">Crear cuenta</button>
     </form>
@@ -30,3 +38,4 @@
     </p>
 </div>
 {% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/auth-forms.js') }}"></script>{% endblock %}

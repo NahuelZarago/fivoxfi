@@ -10,7 +10,7 @@ from app.utils.csrf import csrf_exempt, init_csrf
 from app.utils.text import escape_like, slugify
 from app.utils.urls import safe_next_url
 from app.utils.validation import (
-    ValidationFailure, clean_text, parse_int, parse_money, validate_email, validate_password)
+    ValidationFailure, clean_text, parse_int, parse_money, password_checks, validate_email, validate_password)
 
 
 # ── dinero ──────────────────────────────────────────────────
@@ -206,3 +206,14 @@ def test_csrf_disabled_in_testing_config():
     def x():
         return 'ok'
     assert app.test_client().post('/x').status_code == 200
+
+
+def test_password_checks():
+    score, c = password_checks('')
+    assert score == 0 and not any(c.values())
+    score, c = password_checks('abc')
+    assert score == 1 and c['lower'] and not c['length']
+    score, c = password_checks('Clave1234')
+    assert c['length'] and c['upper'] and c['lower'] and c['digit'] and not c['symbol'] and not c['long']
+    score, c = password_checks('Clave-Muy-Larga-1234!')
+    assert score == 6

@@ -4,8 +4,24 @@
 </svg>
 {%- endmacro %}
 
+{# Mensaje de error en rojo debajo de un campo. El JS lo muestra/oculta; el servidor lo rellena. #}
 {% macro field_error(errors, name) -%}
-{% if errors and errors.get(name) %}<p class="text-xs text-red-600 mt-1">{{ errors[name] }}</p>{% endif %}
+<p data-error-for="{{ name }}" class="text-xs text-red-600 mt-1.5 {{ '' if errors and errors.get(name) else 'hidden' }}" role="alert">{{ errors[name] if errors and errors.get(name) else '' }}</p>
+{%- endmacro %}
+
+{# Medidor de contraseña: barra de 4 tramos (roja -> verde) + lista de requisitos. #}
+{% macro password_meter(target) -%}
+<div data-meter-for="{{ target }}" class="mt-2 hidden">
+    <div class="flex gap-1" aria-hidden="true">
+        {% for i in range(4) %}<span data-seg class="h-1.5 flex-1 rounded-full bg-gray-200 transition-colors"></span>{% endfor %}
+    </div>
+    <p data-meter-label class="text-xs font-semibold mt-1.5" aria-live="polite"></p>
+    <ul class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-1 text-xs">
+        {% for key, text in [('length', '8 caracteres o más'), ('upper', 'Una mayúscula'), ('lower', 'Una minúscula'), ('digit', 'Un número'), ('symbol', 'Un símbolo (!@#$...)'), ('long', '12 caracteres o más')] %}
+        <li data-rule="{{ key }}" class="text-gray-400"><span data-icon aria-hidden="true">○</span> {{ text }}</li>
+        {% endfor %}
+    </ul>
+</div>
 {%- endmacro %}
 
 {% macro pagination(page_obj, endpoint) -%}

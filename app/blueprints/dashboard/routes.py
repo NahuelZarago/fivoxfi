@@ -1,11 +1,11 @@
 from flask import current_app, flash, redirect, render_template, request, url_for
-from flask_login import current_user, login_user
+from flask_login import current_user, login_user, logout_user
 
 from . import dashboard_bp
-from ...extensions import db
+from ...extensions import db, limiter
 from ...models.user import User
 from ...services import metrics
-from ...services.tenants import check_employee_limit, regenerate_code
+from ...services.tenants import check_employee_limit, delete_tenant, regenerate_code
 from ...utils.decorators import login_required_with_tenant, require
 from ...utils.permissions import (
     BUSINESS_SETTINGS, REPORTS_VIEW, ROLE_CLIENT, ROLE_EMPLOYEE, ROLE_OWNER, TEAM_MANAGE)
@@ -139,3 +139,24 @@ def regenerate_invite_code(kind):
         except ValidationFailure as exc:
             flash(str(exc), 'danger')
     return redirect(url_for('dashboard.employees'))
+
+
+# ─── ELIMINAR NEGOCIO ───────────────────────────────────────
+@dashboard_bp.route('/configuracion/eliminar-negocio', methods=['POST'])
+@login_required_with_tenant
+@require(BUSINESS_SETTINGS)
+@limiter.limit('5 per hour')
+def delete_business():
+    tenant = current_user.tenant
+    # Doble confirmación: escribir el nombre exacto y la contraseña.
+    if request.form.get('confirm_name', '').strip() != tenant.name:
+        flash('El nombre que escribiste no coincide con el de tu negocio. No se eliminó nada.', 'danger')
+        return redirect(url_for('dashboard.settings'))
+    if not current_user.check_password(request.form.get('password', '')):
+        flash('Contraseña incorrecta. No se eliminó nada.', 'danger')
+        return redirect(url_for('dashboard.settings'))
+    name = tenant.name
+    delete_tenant(tenant)
+    logout_user()
+    flash(f'El negocio "{name}" y todos sus datos fueron eliminados. Tu cuenta sigue activa: iniciá sesión para crear otro negocio.', 'success')
+    return redirect(url_for('auth.login'))
