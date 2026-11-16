@@ -54,7 +54,7 @@ class Config:
     # ── Negocio ────────────────────────────────────────────
     # Límite de empleados activos por plan (None = sin límite).
     PLAN_EMPLOYEE_LIMITS = {'basic': 3, 'pro': None}
-    SUPPORT_WHATSAPP = os.environ.get('SUPPORT_WHATSAPP', '5491100000000')  # Reemplazar por el real
+    SUPPORT_WHATSAPP = os.environ.get('SUPPORT_WHATSAPP', '5493435617089')  # Reemplazar por el real
     # True cuando se compila Tailwind (ver README) y se sirve /static/css/app.css
     USE_COMPILED_CSS = _env_bool('USE_COMPILED_CSS', False)
 

@@ -10,6 +10,15 @@ def app():
     from app import create_app
     from app.extensions import db
     app = create_app('testing')
+
+    @app.before_request
+    def _fresh_login_user():
+        # La fixture mantiene un contexto de app abierto, así que `g` se comparte entre requests
+        # y Flask-Login reutilizaría al usuario de otro cliente. En producción cada request
+        # tiene su propio contexto; acá lo simulamos.
+        from flask import g
+        g.pop('_login_user', None)
+
     with app.app_context():
         db.create_all()
         yield app

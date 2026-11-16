@@ -52,7 +52,9 @@ def settings_update():
             current_user.set_password(new)
             current_user.auth_version += 1       # Cierra las demás sesiones abiertas
             db.session.commit()
-            login_user(current_user)             # Y mantiene esta
+            # current_user es un proxy: hay que pasar el objeto real, si no Flask-Login
+            # se referencia a sí mismo y entra en recursión infinita.
+            login_user(current_user._get_current_object())   # Y mantiene esta
             flash('Contraseña cambiada. Se cerraron tus otras sesiones.', 'success')
         elif action == 'business' and current_user.can(BUSINESS_SETTINGS):
             current_user.tenant.name = clean_text(
