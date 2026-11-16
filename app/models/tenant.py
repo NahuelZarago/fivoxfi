@@ -1,12 +1,7 @@
-import random
-import string
-from ..extensions import db
 from datetime import datetime
 
-
-def generate_employee_code():
-    chars = string.ascii_uppercase + string.digits
-    return 'FX-' + ''.join(random.choices(chars, k=6))
+from ..extensions import db
+from ..utils.codes import generate_client_code, generate_employee_code
 
 
 class Tenant(db.Model):
@@ -16,8 +11,9 @@ class Tenant(db.Model):
     name = db.Column(db.String(120), nullable=False)
     slug = db.Column(db.String(80), unique=True, nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
-    plan = db.Column(db.String(50), default='basic')
+    plan = db.Column(db.String(50), default='basic', nullable=False)
     employee_code = db.Column(db.String(20), unique=True, nullable=False, default=generate_employee_code)
+    client_code = db.Column(db.String(20), unique=True, nullable=False, default=generate_client_code)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     users = db.relationship('User', backref='tenant', lazy='dynamic')
@@ -25,4 +21,4 @@ class Tenant(db.Model):
     sales = db.relationship('Sale', backref='tenant', lazy='dynamic')
 
     def __repr__(self):
-        return f'<Tenant {self.slug} code={self.employee_code}>'
+        return f'<Tenant {self.slug}>'

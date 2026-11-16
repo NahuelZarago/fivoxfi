@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    {% include '_head.html' %}
+    <title>{% block title %}Fivox{% endblock %} — Fivox</title>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-green-50 min-h-screen flex items-center justify-center p-4">
+{% include '_flash.html' %}
+<div class="w-full {% block width %}max-w-sm{% endblock %}">
+    <div class="text-center mb-8">
+        <a href="{{ url_for('public.index') }}" class="inline-flex items-center gap-2 mb-3">
+            <div class="w-9 h-9 bg-green-600 rounded-xl flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+            </div>
+            <span class="text-2xl font-bold text-gray-900">Fivox</span>
+        </a>
+        {% block subtitle %}{% endblock %}
+    </div>
+    {% block content %}{% endblock %}
+</div>
+{% block scripts %}{% endblock %}
+</body>
+</html>

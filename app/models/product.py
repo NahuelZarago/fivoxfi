@@ -1,7 +1,8 @@
-from ..extensions import db
 from datetime import datetime
 
-LOW_STOCK_THRESHOLD = 5
+from ..extensions import db
+
+DEFAULT_LOW_STOCK_THRESHOLD = 5
 
 
 class Product(db.Model):
@@ -15,23 +16,31 @@ class Product(db.Model):
     cost_price = db.Column(db.Numeric(10, 2), nullable=False)
     sale_price = db.Column(db.Numeric(10, 2), nullable=False)
     stock = db.Column(db.Integer, nullable=False, default=0)
-    is_active = db.Column(db.Boolean, default=True)
+    low_stock_threshold = db.Column(db.Integer, nullable=False, default=DEFAULT_LOW_STOCK_THRESHOLD,
+                                    server_default=str(DEFAULT_LOW_STOCK_THRESHOLD))
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    __table_args__ = (db.UniqueConstraint('tenant_id', 'sku', name='uq_sku_per_tenant'),)
+    __table_args__ = (
+        db.UniqueConstraint('tenant_id', 'sku', name='uq_sku_per_tenant'),
+        # Necesario para la FK compuesta de stock_movements (aislamiento por tenant en la base).
+        db.UniqueConstraint('tenant_id', 'id', name='uq_products_tenant_id_id'),
+        db.CheckConstraint('stock >= 0', name='ck_products_stock_nonneg'),
+        db.CheckConstraint('cost_price >= 0 AND sale_price >= 0', name='ck_products_prices_nonneg'),
+    )
+
+    @property
+    def is_out_of_stock(self):
+        return self.stock <= 0
 
     @property
     def is_low_stock(self):
-        return self.stock <= LOW_STOCK_THRESHOLD
+        return self.stock <= self.low_stock_threshold
 
     @property
-    def profit_margin(self):
-        return float(self.sale_price) - float(self.cost_price)
+    def unit_margin(self):
+        return self.sale_price - self.cost_price
 
-    def to_dict(self):
-        return {
-            'id': self.id, 'name': self.name, 'sku': self.sku or '',
-            'sale_price': float(self.sale_price), 'stock': self.stock,
-            'is_low_stock': self.is_low_stock,
-        }
+    def __repr__(self):
+        return f'<Product {self.id} {self.name}>'

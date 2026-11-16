@@ -1,45 +1,49 @@
 from functools import wraps
-from flask import abort, flash, redirect, url_for
+
+from flask import abort, flash, jsonify, redirect, request, url_for
 from flask_login import current_user
+
+from .permissions import can
+
+
+def _wants_json():
+    return request.path.startswith('/app/pos/api') or request.is_json
 
 
 def login_required_with_tenant(f):
+    """Sesión válida + email verificado + rol + negocio activo."""
     @wraps(f)
-    def decorated_function(*args, **kwargs):
+    def decorated(*args, **kwargs):
         if not current_user.is_authenticated:
+            if _wants_json():
+                return jsonify({'error': 'Sesión expirada. Volvé a iniciar sesión.'}), 401
             flash('Iniciá sesión para continuar.', 'warning')
+            return redirect(url_for('auth.login', next=request.full_path.rstrip('?')))
+        if not current_user.is_active:
+            # Antes esto causaba un bucle de redirecciones login<->dashboard.
+            from flask_login import logout_user
+            logout_user()
+            flash('Tu cuenta fue desactivada. Contactá al dueño del negocio.', 'danger')
             return redirect(url_for('auth.login'))
         if not current_user.is_email_confirmed:
             return redirect(url_for('auth.pending_verification'))
         if not current_user.has_role or not current_user.tenant_id:
             return redirect(url_for('auth.choose_role'))
-        if not current_user.is_active:
-            flash('Tu cuenta fue desactivada.', 'danger')
-            return redirect(url_for('auth.login'))
         if not current_user.tenant.is_active:
             abort(403)
         return f(*args, **kwargs)
-    return decorated_function
+    return decorated
 
 
-def owner_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not current_user.is_owner:
-            flash('Solo el dueño puede acceder.', 'danger')
-            abort(403)
-        return f(*args, **kwargs)
-    return decorated_function
-
-
-def seller_or_owner_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if current_user.role not in ('owner', 'seller'):
-            abort(403)
-        return f(*args, **kwargs)
-    return decorated_function
-
-
-admin_required = owner_required
-seller_or_admin_required = seller_or_owner_required
+def require(capability):
+    """Exige una capacidad (ver permissions.py). Va DEBAJO de login_required_with_tenant."""
+    def wrapper(f):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            if not can(current_user.role, capability):
+                if _wants_json():
+                    return jsonify({'error': 'No tenés permiso para esta acción.'}), 403
+                abort(403)
+            return f(*args, **kwargs)
+        return decorated
+    return wrapper

@@ -1,76 +1,37 @@
 {% extends "base_app.html" %}
-{% block title %}{% if product %}Editar producto{% else %}Nuevo producto{% endif %}{% endblock %}
-
+{% block title %}{{ 'Editar' if product else 'Nuevo' }} producto{% endblock %}
 {% block content %}
+{% macro val(name, default='') %}{{ form.get(name) if form and form.get(name) is not none else default }}{% endmacro %}
 <div class="max-w-2xl">
-    <div class="mb-8">
-        <a href="{{ url_for('inventory.product_list') }}" class="text-sm text-gray-500 hover:text-gray-700">← Volver al inventario</a>
-        <h1 class="text-2xl font-bold text-gray-900 mt-2">
-            {% if product %}Editar producto{% else %}Nuevo producto{% endif %}
-        </h1>
-    </div>
-
-    <div class="bg-white rounded-xl border border-gray-200 p-8">
-        <form method="POST" class="space-y-5">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del producto <span class="text-red-500">*</span></label>
-                <input type="text" name="name" required
-                       value="{{ product.name if product else '' }}"
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                       placeholder="Ej: Arroz 1kg">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-                <textarea name="description" rows="2"
-                          class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="Descripción opcional">{{ product.description if product else '' }}</textarea>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">SKU / Código de barra</label>
-                <input type="text" name="sku"
-                       value="{{ product.sku if product else '' }}"
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
-                       placeholder="7790001234567">
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Precio de costo <span class="text-red-500">*</span></label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-2.5 text-gray-400 text-sm">$</span>
-                        <input type="number" name="cost_price" step="0.01" min="0" required
-                               value="{{ product.cost_price if product else '' }}"
-                               class="w-full border border-gray-300 rounded-lg pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                               placeholder="0.00">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Precio de venta <span class="text-red-500">*</span></label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-2.5 text-gray-400 text-sm">$</span>
-                        <input type="number" name="sale_price" step="0.01" min="0" required
-                               value="{{ product.sale_price if product else '' }}"
-                               class="w-full border border-gray-300 rounded-lg pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                               placeholder="0.00">
-                    </div>
-                </div>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Stock actual <span class="text-red-500">*</span></label>
-                <input type="number" name="stock" min="0" required
-                       value="{{ product.stock if product else 0 }}"
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-            <div class="flex gap-3 pt-2">
-                <button type="submit"
-                        class="bg-blue-600 text-white font-semibold px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-colors text-sm">
-                    {% if product %}Guardar cambios{% else %}Crear producto{% endif %}
-                </button>
-                <a href="{{ url_for('inventory.product_list') }}"
-                   class="border border-gray-300 text-gray-700 font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-50 transition-colors text-sm">
-                    Cancelar
-                </a>
-            </div>
-        </form>
-    </div>
+    <a href="{{ url_for('inventory.product_list') }}" class="text-sm text-gray-500 hover:underline">← Volver al inventario</a>
+    <h1 class="text-2xl font-bold mt-2 mb-6">{{ 'Editar producto' if product else 'Nuevo producto' }}</h1>
+    <form method="POST" class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
+        {{ csrf_input() }}
+        <div><label class="block text-sm font-medium mb-1.5" for="name">Nombre *</label>
+            <input id="name" name="name" required maxlength="200" value="{{ val('name', product.name if product else '') }}" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"></div>
+        <div><label class="block text-sm font-medium mb-1.5" for="description">Descripción</label>
+            <textarea id="description" name="description" rows="2" maxlength="2000" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">{{ val('description', product.description or '' if product else '') }}</textarea></div>
+        <div><label class="block text-sm font-medium mb-1.5" for="sku">SKU / código</label>
+            <input id="sku" name="sku" maxlength="100" value="{{ val('sku', product.sku or '' if product else '') }}" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div><label class="block text-sm font-medium mb-1.5" for="cost_price">Precio de compra *</label>
+                <input id="cost_price" name="cost_price" inputmode="decimal" required value="{{ val('cost_price', product.cost_price if product else '') }}" placeholder="0,00" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"></div>
+            <div><label class="block text-sm font-medium mb-1.5" for="sale_price">Precio de venta *</label>
+                <input id="sale_price" name="sale_price" inputmode="decimal" required value="{{ val('sale_price', product.sale_price if product else '') }}" placeholder="0,00" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"></div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {% if not product %}
+            <div><label class="block text-sm font-medium mb-1.5" for="stock">Stock inicial</label>
+                <input id="stock" name="stock" type="number" min="0" value="{{ val('stock', 0) }}" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"></div>
+            {% else %}
+            <div><label class="block text-sm font-medium mb-1.5">Stock actual</label>
+                <p class="text-sm py-2.5"><strong>{{ product.stock }}</strong> · <a class="text-green-700 underline" href="{{ url_for('inventory.stock_form', product_id=product.id) }}">Registrar movimiento</a></p></div>
+            {% endif %}
+            <div><label class="block text-sm font-medium mb-1.5" for="low_stock_threshold">Avisar cuando queden</label>
+                <input id="low_stock_threshold" name="low_stock_threshold" type="number" min="0" value="{{ val('low_stock_threshold', product.low_stock_threshold if product else 5) }}" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+                <p class="text-xs text-gray-400 mt-1">Unidades o menos = alerta de stock bajo.</p></div>
+        </div>
+        <button class="bg-green-600 text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-green-700 text-sm">Guardar</button>
+    </form>
 </div>
 {% endblock %}

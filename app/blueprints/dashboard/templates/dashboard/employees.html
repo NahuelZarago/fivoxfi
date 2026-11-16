@@ -1,117 +1,61 @@
 {% extends "base_app.html" %}
 {% block title %}Equipo{% endblock %}
-
 {% block content %}
-<div class="flex items-center justify-between mb-8">
-    <div>
-        <h1 class="text-2xl font-bold text-gray-900">Equipo</h1>
-        <p class="text-gray-500 text-sm mt-1">{{ employees|length }} miembro{% if employees|length != 1 %}s{% endif %} en {{ current_user.tenant.name }}</p>
-    </div>
-    <button onclick="document.getElementById('modalNuevo').classList.remove('hidden')"
-            class="flex items-center gap-2 bg-green-600 text-white font-medium px-4 py-2.5 rounded-xl hover:bg-green-700 transition-colors text-sm">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-        </svg>
-        Agregar empleado
-    </button>
+<div class="mb-6">
+    <h1 class="text-2xl font-bold">Equipo y clientes</h1>
+    <p class="text-gray-500 text-sm mt-1">{{ members|length }} persona{{ 's' if members|length != 1 }} en {{ tenant.name }}</p>
 </div>
 
-<!-- CÓDIGO DE EMPLEADO — tarjeta principal -->
-<div class="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-6 mb-8 text-white relative overflow-hidden">
-    <!-- Decoración -->
-    <div class="absolute top-0 right-0 w-40 h-40 bg-green-500/10 rounded-full -mr-10 -mt-10"></div>
-    <div class="absolute bottom-0 left-0 w-24 h-24 bg-green-500/5 rounded-full -ml-5 -mb-5"></div>
-
-    <div class="relative">
-        <div class="flex items-start justify-between mb-4">
-            <div>
-                <p class="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1">Código de empleado</p>
-                <p class="text-gray-300 text-sm">Compartí este código con tus empleados para que puedan unirse.</p>
-            </div>
-            <div class="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
-                </svg>
-            </div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+    {% for kind, title, code, desc in [
+        ('employee', 'Código de empleado', tenant.employee_code, 'Da acceso a vender y manejar el stock.'),
+        ('client', 'Código de cliente', tenant.client_code, 'Da acceso al módulo de turnos.')] %}
+    <div class="bg-gray-900 text-white rounded-2xl p-5">
+        <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">{{ title }}</p>
+        <p class="text-gray-300 text-sm mb-3">{{ desc }}</p>
+        <div class="flex flex-wrap items-center gap-3">
+            <span class="text-2xl font-black font-mono tracking-widest text-green-400 select-all">{{ code }}</span>
+            <button type="button" data-copy="{{ code }}" class="bg-green-500 hover:bg-green-400 font-semibold px-3 py-1.5 rounded-lg text-sm">Copiar</button>
+            <form method="POST" action="{{ url_for('dashboard.regenerate_invite_code', kind=kind) }}"
+                  onsubmit="return confirm('El código actual dejará de funcionar. ¿Generar uno nuevo?')">
+                {{ csrf_input() }}
+                <button class="text-xs text-gray-400 hover:text-white underline">Generar otro</button>
+            </form>
         </div>
-
-        <div class="flex items-center gap-4">
-            <div class="bg-white/10 backdrop-blur rounded-xl px-6 py-3 border border-white/20">
-                <span id="employeeCode"
-                      class="text-3xl font-black font-mono tracking-widest text-green-400">
-                    {{ current_user.tenant.employee_code }}
-                </span>
-            </div>
-            <button onclick="copyCode()"
-                    class="flex items-center gap-2 bg-green-500 hover:bg-green-400 text-white font-semibold px-4 py-3 rounded-xl transition-colors text-sm">
-                <svg id="copyIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                </svg>
-                <span id="copyText">Copiar</span>
-            </button>
-        </div>
-
-        <p class="text-gray-500 text-xs mt-4">
-            Los empleados lo ingresan en <strong class="text-gray-400">fivox.app/auth/setup-empleado</strong> al registrarse.
-        </p>
     </div>
+    {% endfor %}
 </div>
 
-<!-- Tabla de equipo -->
-<div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-        <h2 class="font-semibold text-gray-900 text-sm">Miembros del equipo</h2>
-        <span class="text-xs text-gray-400">{{ employees|length }} total</span>
-    </div>
+<details class="bg-white rounded-2xl border border-gray-200 p-5 mb-6">
+    <summary class="font-semibold cursor-pointer">Agregar empleado manualmente</summary>
+    <form method="POST" action="{{ url_for('dashboard.employee_create') }}" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+        {{ csrf_input() }}
+        <input name="username" placeholder="Nombre" required maxlength="80" aria-label="Nombre" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+        <input name="email" type="email" placeholder="Email" required aria-label="Email" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+        <input name="password" type="password" placeholder="Contraseña inicial" required minlength="8" autocomplete="new-password" aria-label="Contraseña" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+        <button class="sm:col-span-3 bg-green-600 text-white font-semibold px-4 py-2 rounded-xl hover:bg-green-700 text-sm">Crear empleado</button>
+    </form>
+</details>
+
+<div class="bg-white rounded-2xl border border-gray-200 overflow-x-auto">
     <table class="w-full text-sm">
-        <thead class="bg-gray-50 border-b border-gray-100">
-            <tr>
-                <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Empleado</th>
-                <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
-                <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Rol</th>
-                <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                <th class="px-6 py-3"></th>
-            </tr>
+        <thead class="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500">
+            <tr><th class="text-left px-4 py-3">Nombre</th><th class="text-left px-4 py-3">Email</th><th class="text-left px-4 py-3">Rol</th><th class="text-left px-4 py-3">Estado</th><th></th></tr>
         </thead>
-        <tbody class="divide-y divide-gray-50">
-            {% for emp in employees %}
-            <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg {% if emp.is_owner %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-600{% endif %} flex items-center justify-center text-sm font-bold flex-shrink-0">
-                            {{ emp.username[0].upper() }}
-                        </div>
-                        <div>
-                            <p class="font-semibold text-gray-900">{{ emp.username }}</p>
-                            {% if emp.id == current_user.id %}
-                            <p class="text-xs text-green-600 font-medium">Sos vos</p>
-                            {% endif %}
-                        </div>
-                    </div>
+        <tbody class="divide-y divide-gray-100">
+            {% for u in members %}
+            <tr>
+                <td class="px-4 py-3 font-medium">{{ u.username }}</td>
+                <td class="px-4 py-3 text-gray-500">{{ u.email }}</td>
+                <td class="px-4 py-3">{{ u.role_label }}</td>
+                <td class="px-4 py-3">
+                    <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ 'bg-green-100 text-green-700' if u.is_active else 'bg-gray-100 text-gray-500' }}">{{ 'Activo' if u.is_active else 'De baja' }}</span>
                 </td>
-                <td class="px-6 py-4 text-gray-500 text-sm">{{ emp.email }}</td>
-                <td class="px-6 py-4">
-                    <span class="px-2.5 py-1 rounded-lg text-xs font-semibold
-                        {% if emp.is_owner %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-600{% endif %}">
-                        {{ 'Dueño' if emp.is_owner else 'Vendedor' }}
-                    </span>
-                </td>
-                <td class="px-6 py-4">
-                    <div class="flex items-center gap-1.5">
-                        <span class="w-1.5 h-1.5 rounded-full {% if emp.is_active %}bg-green-500{% else %}bg-gray-300{% endif %}"></span>
-                        <span class="text-xs {% if emp.is_active %}text-green-700{% else %}text-gray-400{% endif %} font-medium">
-                            {{ 'Activo' if emp.is_active else 'Inactivo' }}
-                        </span>
-                    </div>
-                </td>
-                <td class="px-6 py-4 text-right">
-                    {% if emp.id != current_user.id and not emp.is_owner %}
-                    <form method="POST" action="{{ url_for('dashboard.employee_toggle', user_id=emp.id) }}">
-                        <button type="submit"
-                                class="text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors
-                                {% if emp.is_active %}border-red-200 text-red-500 hover:bg-red-50{% else %}border-green-200 text-green-600 hover:bg-green-50{% endif %}">
-                            {{ 'Dar de baja' if emp.is_active else 'Reactivar' }}
-                        </button>
+                <td class="px-4 py-3 text-right">
+                    {% if u.id != current_user.id and not u.is_owner %}
+                    <form method="POST" action="{{ url_for('dashboard.employee_toggle', user_id=u.id) }}">
+                        {{ csrf_input() }}
+                        <button class="text-xs font-semibold {{ 'text-red-600' if u.is_active else 'text-green-700' }} hover:underline">{{ 'Dar de baja' if u.is_active else 'Reactivar' }}</button>
                     </form>
                     {% endif %}
                 </td>
@@ -120,66 +64,15 @@
         </tbody>
     </table>
 </div>
-
-<!-- Modal nuevo empleado manual -->
-<div id="modalNuevo" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50 flex">
-    <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full mx-4">
-        <div class="flex items-center justify-between mb-2">
-            <h3 class="text-lg font-bold text-gray-900">Agregar empleado manualmente</h3>
-            <button onclick="document.getElementById('modalNuevo').classList.add('hidden')"
-                    class="w-8 h-8 rounded-lg text-gray-400 hover:bg-gray-100 flex items-center justify-center">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-        <p class="text-xs text-gray-500 mb-5">También podés darle el código <strong class="font-mono text-gray-700">{{ current_user.tenant.employee_code }}</strong> para que se registre solo.</p>
-
-        <form method="POST" action="{{ url_for('dashboard.employee_create') }}" class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Nombre completo</label>
-                <input type="text" name="username" required
-                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
-                <input type="email" name="email" required
-                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Contraseña temporal</label>
-                <input type="password" name="password" required minlength="8"
-                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"
-                       placeholder="Mínimo 8 caracteres">
-            </div>
-            <div class="flex gap-3 pt-1">
-                <button type="submit"
-                        class="flex-1 bg-green-600 text-white font-semibold py-2.5 rounded-xl hover:bg-green-700 text-sm">
-                    Crear empleado
-                </button>
-                <button type="button" onclick="document.getElementById('modalNuevo').classList.add('hidden')"
-                        class="flex-1 border border-gray-200 text-gray-600 font-semibold py-2.5 rounded-xl hover:bg-gray-50 text-sm">
-                    Cancelar
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
 {% endblock %}
-
 {% block scripts %}
 <script>
-function copyCode() {
-    const code = document.getElementById('employeeCode').textContent.trim();
-    navigator.clipboard.writeText(code).then(() => {
-        document.getElementById('copyText').textContent = '¡Copiado!';
-        document.getElementById('copyIcon').innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>';
-        setTimeout(() => {
-            document.getElementById('copyText').textContent = 'Copiar';
-            document.getElementById('copyIcon').innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>';
-        }, 2000);
+document.querySelectorAll('[data-copy]').forEach(function (b) {
+    b.addEventListener('click', function () {
+        navigator.clipboard.writeText(b.dataset.copy).then(function () {
+            var t = b.textContent; b.textContent = '¡Copiado!'; setTimeout(function () { b.textContent = t; }, 1500);
+        });
     });
-}
+});
 </script>
 {% endblock %}

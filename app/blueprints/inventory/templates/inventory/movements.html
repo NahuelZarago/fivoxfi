@@ -1,0 +1,33 @@
+{% extends "base_app.html" %}
+{% from '_macros.html' import pagination %}
+{% block title %}Movimientos de stock{% endblock %}
+{% block content %}
+<div class="mb-6"><h1 class="text-2xl font-bold">Movimientos de stock</h1>
+    <p class="text-gray-500 text-sm mt-1">Registro permanente de entradas, ventas, mermas y ajustes.</p></div>
+<form method="GET" class="mb-4 flex gap-2">
+    <select name="reason" aria-label="Motivo" class="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white">
+        <option value="">Todos los motivos</option>
+        {% for key, label in reasons.items() %}<option value="{{ key }}" {{ 'selected' if key == reason }}>{{ label }}</option>{% endfor %}
+    </select>
+    <button class="bg-gray-900 text-white px-4 py-2 rounded-xl text-sm font-semibold">Filtrar</button>
+</form>
+<div class="bg-white rounded-2xl border border-gray-200 overflow-x-auto">
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b text-xs uppercase text-gray-500"><tr>
+            <th class="text-left px-4 py-3">Fecha</th><th class="text-left px-4 py-3">Producto</th><th class="text-left px-4 py-3">Motivo</th>
+            <th class="text-right px-4 py-3">Cambio</th><th class="text-right px-4 py-3">Quedó</th><th class="text-left px-4 py-3">Usuario</th></tr></thead>
+        <tbody class="divide-y divide-gray-100">
+        {% for m, name in rows.items %}
+            <tr><td class="px-4 py-2.5 whitespace-nowrap">{{ m.created_at|local_dt }}</td>
+                <td class="px-4 py-2.5 font-medium">{{ name }}</td>
+                <td class="px-4 py-2.5">{{ m.reason|reason_label }}{% if m.sale_id %} <span class="text-gray-400">#{{ m.sale_id }}</span>{% endif %}</td>
+                <td class="px-4 py-2.5 text-right font-semibold {{ 'text-green-700' if m.quantity_change > 0 else 'text-red-600' }}">{{ '+' if m.quantity_change > 0 }}{{ m.quantity_change }}</td>
+                <td class="px-4 py-2.5 text-right">{{ m.stock_after }}</td>
+                <td class="px-4 py-2.5 text-gray-500">{{ m.user.username if m.user else '—' }}</td></tr>
+        {% else %}<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">Sin movimientos.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{{ pagination(rows, 'inventory.movement_list', reason=reason) }}
+{% endblock %}

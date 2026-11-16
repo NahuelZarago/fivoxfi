@@ -1,79 +1,31 @@
 {% extends "base_app.html" %}
-{% block title %}Inicio{% endblock %}
-
+{% block title %}Mis aplicaciones{% endblock %}
 {% block content %}
-
-<div class="mb-10">
-    <h1 class="text-2xl font-bold text-gray-900">Hola, {{ current_user.username }} 👋</h1>
-    <p class="text-gray-500 text-sm mt-1">{{ current_user.tenant.name }} — Bienvenido a tu espacio de trabajo</p>
+<div class="mb-8">
+    <h1 class="text-2xl font-bold">Hola, {{ current_user.username }}</h1>
+    <p class="text-gray-500 text-sm mt-1">{{ current_user.tenant.name }} · {{ current_user.role_label }}</p>
 </div>
-
-<!-- Mis Aplicaciones -->
-<section class="mb-12">
-    <div class="flex items-center gap-3 mb-5">
-        <h2 class="text-sm font-bold text-gray-700 uppercase tracking-wider">Mis Aplicaciones</h2>
-        <span class="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">Activas</span>
-    </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {% for app in owned_apps %}
-        <div class="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-md hover:border-green-200 transition-all group">
-            <div class="flex items-start justify-between mb-5">
-                <div class="text-3xl">{{ app.icon }}</div>
-                <span class="flex items-center gap-1.5 text-xs text-green-600 font-semibold bg-green-50 px-2.5 py-1 rounded-full">
-                    <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
-                    Activo
-                </span>
-            </div>
-            <h3 class="font-bold text-gray-900 text-base mb-1.5">{{ app.name }}</h3>
-            <p class="text-gray-500 text-sm mb-5 leading-relaxed">{{ app.description }}</p>
-            <a href="{{ url_for('dashboard.gestion') }}"
-               class="flex items-center justify-center gap-2 bg-green-600 text-white font-semibold px-4 py-2.5 rounded-xl
-                      hover:bg-green-700 transition-colors text-sm w-full">
-                Abrir
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                </svg>
-            </a>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-4xl">
+    {% if can('inventory.view') or can('pos.sell') %}
+    <div class="bg-white rounded-2xl border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-bold">Stock y finanzas</h2>
+            <span class="text-xs font-semibold bg-green-100 text-green-700 px-2.5 py-1 rounded-full">Activo</span>
         </div>
-        {% endfor %}
+        <p class="text-sm text-gray-500 mb-5">Productos, ventas, movimientos de stock y métricas de tu negocio.</p>
+        <a href="{{ url_for('dashboard.gestion') if can('reports.view') else url_for('pos.terminal') }}"
+           class="inline-block bg-green-600 text-white font-semibold px-4 py-2 rounded-xl hover:bg-green-700 text-sm">Abrir</a>
     </div>
-</section>
-
-<!-- Próximamente -->
-<section>
-    <div class="flex items-center gap-3 mb-5">
-        <h2 class="text-sm font-bold text-gray-700 uppercase tracking-wider">Próximamente</h2>
-        <span class="bg-gray-100 text-gray-500 text-xs font-semibold px-2 py-0.5 rounded-full">En desarrollo</span>
-    </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {% for app in explore_apps %}
-        <div class="bg-white rounded-2xl border border-dashed border-gray-200 p-6 opacity-70">
-            <div class="flex items-start justify-between mb-5">
-                <div class="text-3xl grayscale">{{ app.icon }}</div>
-                <span class="text-xs text-gray-400 font-medium bg-gray-100 px-2 py-1 rounded-full">Pronto</span>
-            </div>
-            <h3 class="font-bold text-gray-600 text-base mb-1.5">{{ app.name }}</h3>
-            <p class="text-gray-400 text-sm mb-5 leading-relaxed">{{ app.description }}</p>
-            <a href="{{ url_for('public.contact') }}"
-               class="flex items-center justify-center gap-2 border border-gray-200 text-gray-500 font-semibold px-4 py-2.5
-                      rounded-xl hover:bg-gray-50 transition-colors text-sm w-full">
-                Notificarme
-            </a>
+    {% endif %}
+    {% if can('appointments.view') %}
+    <div class="bg-white rounded-2xl border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-bold">Turnos y recordatorios</h2>
+            <span class="text-xs font-semibold bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full">Próximamente</span>
         </div>
-        {% endfor %}
-
-        <!-- Soporte -->
-        <div class="bg-green-50 rounded-2xl border border-green-100 p-6">
-            <div class="text-3xl mb-5">💬</div>
-            <h3 class="font-bold text-gray-800 text-base mb-1.5">¿Necesitás ayuda?</h3>
-            <p class="text-gray-500 text-sm mb-5 leading-relaxed">Nuestro equipo responde por WhatsApp en minutos.</p>
-            <a href="{{ url_for('public.contact') }}"
-               class="flex items-center justify-center gap-2 bg-green-600 text-white font-semibold px-4 py-2.5
-                      rounded-xl hover:bg-green-700 transition-colors text-sm w-full">
-                Contactar soporte
-            </a>
-        </div>
+        <p class="text-sm text-gray-500 mb-5">Agenda online y avisos automáticos por WhatsApp o email.</p>
+        <a href="{{ url_for('appointments.index') }}" class="inline-block border border-gray-300 font-semibold px-4 py-2 rounded-xl hover:bg-gray-50 text-sm">Ver estado</a>
     </div>
-</section>
-
+    {% endif %}
+</div>
 {% endblock %}

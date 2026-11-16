@@ -1,59 +1,33 @@
 {% extends "base_app.html" %}
-{% block title %}Cierre de Caja{% endblock %}
-
+{% block title %}Cierre diario{% endblock %}
 {% block content %}
-<div class="mb-8">
-    <h1 class="text-2xl font-bold text-gray-900">Cierre de Caja</h1>
-    <p class="text-gray-500 mt-1">Últimas 24 horas — desde {{ since.strftime('%d/%m/%Y %H:%M') }}</p>
-</div>
-
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-    <div class="bg-white rounded-xl border border-gray-200 p-6">
-        <p class="text-sm text-gray-500 mb-1">Total facturado</p>
-        <p class="text-3xl font-bold text-gray-900">${{ "%.2f"|format(grand_total) }}</p>
-    </div>
-    <div class="bg-white rounded-xl border border-gray-200 p-6">
-        <p class="text-sm text-gray-500 mb-1">Ganancia neta</p>
-        <p class="text-3xl font-bold text-green-600">${{ "%.2f"|format(grand_profit) }}</p>
+<div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <div><h1 class="text-2xl font-bold">Cierre diario</h1>
+        <p class="text-gray-500 text-sm mt-1">{{ day.strftime('%d/%m/%Y') }}{{ ' (hoy)' if day == today }} · ventas anuladas excluidas</p></div>
+    <div class="flex items-center gap-2 text-sm">
+        <a class="px-3 py-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50" href="{{ url_for('reports.daily_close', fecha=prev_day.isoformat()) }}">← Día anterior</a>
+        <form method="GET"><input type="date" name="fecha" value="{{ day.isoformat() }}" max="{{ today.isoformat() }}" onchange="this.form.submit()" aria-label="Fecha"
+            class="px-3 py-2 rounded-xl border border-gray-200 bg-white"></form>
+        {% if next_day %}<a class="px-3 py-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50" href="{{ url_for('reports.daily_close', fecha=next_day.isoformat()) }}">Día siguiente →</a>{% endif %}
     </div>
 </div>
-
-<div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-100">
-        <h2 class="font-semibold text-gray-900">Desglose por método de pago</h2>
-    </div>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded-2xl border border-gray-200 p-5"><p class="text-xs uppercase font-semibold text-gray-500">Total vendido</p><p class="text-2xl font-bold mt-1">{{ close.total|money }}</p></div>
+    <div class="bg-white rounded-2xl border border-gray-200 p-5"><p class="text-xs uppercase font-semibold text-gray-500">Ganancia</p><p class="text-2xl font-bold mt-1 text-green-700">{{ close.profit|money }}</p></div>
+    <div class="bg-white rounded-2xl border border-gray-200 p-5"><p class="text-xs uppercase font-semibold text-gray-500">Ventas</p><p class="text-2xl font-bold mt-1">{{ close.count }}</p></div>
+</div>
+<div class="bg-white rounded-2xl border border-gray-200 overflow-x-auto">
     <table class="w-full text-sm">
-        <thead class="bg-gray-50">
-            <tr>
-                <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Método</th>
-                <th class="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Transacciones</th>
-                <th class="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Total</th>
-                <th class="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Ganancia</th>
-            </tr>
-        </thead>
+        <thead class="bg-gray-50 border-b text-xs uppercase text-gray-500"><tr>
+            <th class="text-left px-4 py-3">Medio de pago</th><th class="text-right px-4 py-3">Ventas</th><th class="text-right px-4 py-3">Total</th><th class="text-right px-4 py-3">Ganancia</th></tr></thead>
         <tbody class="divide-y divide-gray-100">
-            {% for row in results %}
-            <tr>
-                <td class="px-6 py-4 font-medium capitalize">
-                    {% if row.payment_method == 'cash' %}💵 Efectivo
-                    {% elif row.payment_method == 'card' %}💳 Tarjeta
-                    {% elif row.payment_method == 'transfer' %}🔁 Transferencia
-                    {% else %}{{ row.payment_method }}{% endif %}
-                </td>
-                <td class="px-6 py-4 text-right text-gray-600">{{ row.count }}</td>
-                <td class="px-6 py-4 text-right font-semibold">${{ "%.2f"|format(row.total) }}</td>
-                <td class="px-6 py-4 text-right text-green-600 font-medium">${{ "%.2f"|format(row.profit) }}</td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="4" class="px-6 py-12 text-center text-gray-400">No hay ventas en las últimas 24 horas.</td>
-            </tr>
-            {% endfor %}
+        {% for r in close.rows %}
+            <tr><td class="px-4 py-3 font-medium">{{ r.method|payment_label }}</td><td class="px-4 py-3 text-right">{{ r.count }}</td>
+                <td class="px-4 py-3 text-right font-semibold">{{ r.total|money }}</td><td class="px-4 py-3 text-right text-green-700">{{ r.profit|money }}</td></tr>
+        {% else %}<tr><td colspan="4" class="px-4 py-8 text-center text-gray-400">No hubo ventas este día.</td></tr>
+        {% endfor %}
         </tbody>
     </table>
 </div>
-
-<div class="mt-4">
-    <a href="{{ url_for('reports.sales_history') }}" class="text-sm text-blue-600 hover:underline">Ver historial completo →</a>
-</div>
+<p class="mt-4 text-sm"><a class="text-green-700 hover:underline" href="{{ url_for('reports.sales_history') }}">Ver historial completo de ventas →</a></p>
 {% endblock %}

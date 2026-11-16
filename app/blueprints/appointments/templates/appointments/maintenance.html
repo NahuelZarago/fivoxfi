@@ -1,0 +1,26 @@
+{% extends "base_app.html" %}
+{% block title %}Turnos y recordatorios{% endblock %}
+{% block content %}
+<div class="max-w-xl mx-auto text-center py-10 sm:py-16">
+    <div class="w-24 h-24 mx-auto mb-6 rounded-3xl bg-amber-100 flex items-center justify-center" aria-hidden="true">
+        {# Ícono de construcción: casco de obra #}
+        <svg class="w-14 h-14 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 18h18v2H3z"/><path d="M5 18v-3a7 7 0 0114 0v3"/><path d="M12 8V5m0 0h-2m2 0h2"/><path d="M9.5 18v-4m5 4v-4"/>
+        </svg>
+    </div>
+    <span class="inline-block text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-700 px-3 py-1 rounded-full mb-4">Próximamente</span>
+    <h1 class="text-3xl font-bold mb-3">Módulo en mantenimiento</h1>
+    <p class="text-gray-500 mb-8">Estamos construyendo <strong>Turnos y Recordatorios</strong>: reservas online y avisos automáticos para tus clientes. Muy pronto vas a poder usarlo desde acá.</p>
+
+    <ul class="text-left bg-white rounded-2xl border border-gray-200 divide-y divide-gray-100 mb-8" aria-label="Funciones que van a llegar">
+        {% for f in ['Agenda de turnos online', 'Recordatorios automáticos por WhatsApp y email', 'Reprogramación y cancelación por el cliente'] %}
+        <li class="flex items-center gap-3 px-5 py-3.5 text-sm text-gray-400" aria-disabled="true">
+            <span class="w-5 h-5 rounded-full border border-gray-300 flex-shrink-0"></span>{{ f }}
+            <span class="ml-auto text-[10px] uppercase font-semibold bg-gray-100 text-gray-400 px-2 py-0.5 rounded">Deshabilitado</span>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <a href="{{ url_for('dashboard.index') }}" class="inline-block bg-green-600 text-white font-semibold px-6 py-2.5 rounded-xl hover:bg-green-700 text-sm">Volver a mis aplicaciones</a>
+</div>
+{% endblock %}

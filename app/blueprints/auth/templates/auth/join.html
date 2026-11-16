@@ -1,0 +1,15 @@
+{% extends 'base_auth.html' %}
+{% block title %}Unirme con un código{% endblock %}
+{% block content %}
+<div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
+    <h2 class="text-lg font-bold text-gray-900 mb-2">Ingresá tu código de invitación</h2>
+    <p class="text-sm text-gray-500 mb-6">Te lo da el dueño del negocio. Si empieza con <strong>FX-</strong> entrás como empleado; si empieza con <strong>FC-</strong>, como cliente.</p>
+    <form method="POST" class="space-y-4">
+        {{ csrf_input() }}
+        <input name="code" required autofocus autocomplete="off" maxlength="20" placeholder="FX-A3K9B2"
+               class="w-full border border-gray-200 rounded-xl px-4 py-3 text-center font-mono text-lg tracking-widest uppercase focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50" aria-label="Código de invitación">
+        <button type="submit" class="w-full bg-green-600 text-white font-semibold py-3 rounded-xl hover:bg-green-700 transition-colors text-sm">Unirme</button>
+    </form>
+    <p class="text-center text-sm mt-6"><a href="{{ url_for('auth.choose_role') }}" class="text-gray-500 hover:underline">Volver</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% macro icon(paths, cls='w-4 h-4') -%}
+<svg class="{{ cls }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    {% for d in paths %}<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ d }}"/>{% endfor %}
+</svg>
+{%- endmacro %}
+
+{% macro field_error(errors, name) -%}
+{% if errors and errors.get(name) %}<p class="text-xs text-red-600 mt-1">{{ errors[name] }}</p>{% endif %}
+{%- endmacro %}
+
+{% macro pagination(page_obj, endpoint) -%}
+{% if page_obj.pages > 1 %}
+<div class="flex items-center justify-between mt-4 text-sm">
+    <span class="text-gray-500">Página {{ page_obj.page }} de {{ page_obj.pages }}</span>
+    <div class="flex gap-2">
+        {% if page_obj.has_prev %}<a class="px-3 py-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50" href="{{ url_for(endpoint, page=page_obj.prev_num, **kwargs) }}">Anterior</a>{% endif %}
+        {% if page_obj.has_next %}<a class="px-3 py-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50" href="{{ url_for(endpoint, page=page_obj.next_num, **kwargs) }}">Siguiente</a>{% endif %}
+    </div>
+</div>
+{% endif %}
+{%- endmacro %}

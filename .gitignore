@@ -1,5 +1,10 @@
 .env
 __pycache__/
+*.pyc
 instance/
 venv/
-.env.example
+.venv/
+.pytest_cache/
+node_modules/
+# CSS compilado de Tailwind (se genera con el comando del README)
+app/static/css/app.css

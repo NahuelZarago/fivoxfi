@@ -1,7 +1,10 @@
-from ..extensions import db, login_manager
-from flask_login import UserMixin
-from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+
+from flask_login import UserMixin
+from werkzeug.security import check_password_hash, generate_password_hash
+
+from ..extensions import db, login_manager
+from ..utils.permissions import ROLE_CLIENT, ROLE_EMPLOYEE, ROLE_LABELS, ROLE_OWNER, can
 
 
 class User(UserMixin, db.Model):
@@ -15,6 +18,8 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), nullable=True, default=None)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     is_email_confirmed = db.Column(db.Boolean, default=False, nullable=False)
+    # Se incrementa al cambiar la contraseña: invalida sesiones y cookies "recordarme" viejas.
+    auth_version = db.Column(db.Integer, default=0, nullable=False, server_default='0')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, password):
@@ -23,26 +28,43 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    def get_id(self):
+        return f'{self.id}:{self.auth_version}'
+
+    def can(self, capability):
+        return can(self.role, capability)
+
     @property
     def is_owner(self):
-        return self.role == 'owner'
+        return self.role == ROLE_OWNER
 
     @property
-    def is_seller(self):
-        return self.role == 'seller'
+    def is_employee(self):
+        return self.role == ROLE_EMPLOYEE
 
     @property
-    def is_admin(self):
-        return self.role == 'owner'
+    def is_client(self):
+        return self.role == ROLE_CLIENT
 
     @property
     def has_role(self):
-        return self.role in ('owner', 'seller')
+        return self.role in ROLE_LABELS
+
+    @property
+    def role_label(self):
+        return ROLE_LABELS.get(self.role, 'Sin rol')
 
     def __repr__(self):
-        return f'<User {self.email} | role={self.role}>'
+        return f'<User {self.id} role={self.role}>'
 
 
 @login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+def load_user(session_id):
+    try:
+        user_id, _, version = str(session_id).partition(':')
+        user = db.session.get(User, int(user_id))
+    except (TypeError, ValueError):
+        return None
+    if user is None or str(user.auth_version) != version:
+        return None
+    return user

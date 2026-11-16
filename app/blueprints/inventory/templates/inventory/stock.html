@@ -1,0 +1,51 @@
+{% extends "base_app.html" %}
+{% from '_macros.html' import pagination %}
+{% block title %}Stock · {{ product.name }}{% endblock %}
+{% block content %}
+<a href="{{ url_for('inventory.product_list') }}" class="text-sm text-gray-500 hover:underline">← Volver al inventario</a>
+<div class="flex flex-wrap items-end justify-between gap-3 mt-2 mb-6">
+    <div><h1 class="text-2xl font-bold">{{ product.name }}</h1>
+        <p class="text-sm text-gray-500">SKU {{ product.sku or '—' }}</p></div>
+    <div class="text-right"><p class="text-xs uppercase text-gray-500 font-semibold">Stock actual</p>
+        <p class="text-3xl font-black {{ 'text-red-600' if product.is_low_stock else 'text-green-700' }}">{{ product.stock }}</p></div>
+</div>
+
+<form method="POST" action="{{ url_for('inventory.stock_move', product_id=product.id) }}" class="bg-white rounded-2xl border border-gray-200 p-5 mb-6 grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+    {{ csrf_input() }}
+    <div><label class="block text-sm font-medium mb-1.5" for="kind">Tipo</label>
+        <select id="kind" name="kind" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            <option value="entry">Entrada (compra / reposición)</option>
+            {% if can('stock.adjust') %}
+            <option value="loss">Salida por merma / pérdida</option>
+            <option value="adjust_set">Ajuste: stock contado real</option>
+            {% endif %}
+        </select></div>
+    <div><label class="block text-sm font-medium mb-1.5" for="quantity">Cantidad</label>
+        <input id="quantity" name="quantity" type="number" min="0" required class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"></div>
+    <div><label class="block text-sm font-medium mb-1.5" for="note">Nota (opcional)</label>
+        <input id="note" name="note" maxlength="200" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"></div>
+    <button class="bg-green-600 text-white font-semibold px-4 py-2.5 rounded-xl hover:bg-green-700 text-sm">Registrar</button>
+</form>
+
+<h2 class="font-bold mb-3">Historial</h2>
+<div class="bg-white rounded-2xl border border-gray-200 overflow-x-auto">
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b text-xs uppercase text-gray-500"><tr>
+            <th class="text-left px-4 py-3">Fecha</th><th class="text-left px-4 py-3">Motivo</th>
+            <th class="text-right px-4 py-3">Cambio</th><th class="text-right px-4 py-3">Quedó</th>
+            <th class="text-left px-4 py-3">Usuario</th><th class="text-left px-4 py-3">Nota</th></tr></thead>
+        <tbody class="divide-y divide-gray-100">
+        {% for m in movements.items %}
+            <tr><td class="px-4 py-2.5 whitespace-nowrap">{{ m.created_at|local_dt }}</td>
+                <td class="px-4 py-2.5">{{ m.reason|reason_label }}</td>
+                <td class="px-4 py-2.5 text-right font-semibold {{ 'text-green-700' if m.quantity_change > 0 else 'text-red-600' }}">{{ '+' if m.quantity_change > 0 }}{{ m.quantity_change }}</td>
+                <td class="px-4 py-2.5 text-right">{{ m.stock_after }}</td>
+                <td class="px-4 py-2.5 text-gray-500">{{ m.user.username if m.user else '—' }}</td>
+                <td class="px-4 py-2.5 text-gray-500">{{ m.note or '' }}</td></tr>
+        {% else %}<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">Sin movimientos todavía.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{{ pagination(movements, 'inventory.stock_form', product_id=product.id) }}
+{% endblock %}

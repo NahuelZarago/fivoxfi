@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: fivox
+      POSTGRES_PASSWORD: fivox
+      POSTGRES_DB: fivox
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fivox"]
+      interval: 5s
+      retries: 10
+  redis:
+    image: redis:7-alpine
+  web:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://fivox:fivox@db:5432/fivox
+      RATELIMIT_STORAGE_URI: redis://redis:6379/0
+      APP_ENV: ${APP_ENV:-development}
+    ports: ["8000:8000"]
+    depends_on:
+      db: {condition: service_healthy}
+    command: sh -c "flask --app run db upgrade && gunicorn run:app --bind 0.0.0.0:8000 --workers 3"
+volumes:
+  pgdata:

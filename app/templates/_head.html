@@ -1,0 +1,15 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+{% if use_compiled_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+{% else %}
+{# Tailwind por CDN: cómodo para desarrollar, NO recomendado en producción (ver README para compilar). #}
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = { theme: { extend: { colors: { green: {
+  50:'#effaf2',100:'#d8f3df',200:'#b3e6c2',300:'#82d29d',400:'#4fb87a',
+  500:'#2a9d5f',600:'#1e8049',700:'#1a663c',800:'#185133',900:'#14422b',950:'#0a2517' } } } } };
+</script>
+{% endif %}
