@@ -24,6 +24,8 @@ def _after_auth_redirect(user):
     if not user.is_email_confirmed:
         return redirect(url_for('auth.pending_verification'))
     if not user.has_role or not user.tenant_id:
+        if user.is_superadmin:
+            return redirect(url_for('admin.index'))
         return redirect(url_for('auth.choose_role'))
     return redirect(url_for(home_endpoint(user.role)))
 

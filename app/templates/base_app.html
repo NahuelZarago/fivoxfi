@@ -49,6 +49,14 @@
                 </a>
                 {% endfor %}
             {% endfor %}
+            {% if current_user.is_superadmin %}
+            <div class="pt-4 pb-1.5"><p class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Plataforma</p></div>
+            <a href="{{ url_for('admin.index') }}" {% if request.endpoint and request.endpoint.startswith('admin.') %}aria-current="page"{% endif %}
+               class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors {% if request.endpoint and request.endpoint.startswith('admin.') %}bg-green-600 text-white{% else %}text-gray-300 hover:bg-gray-800 hover:text-white{% endif %}">
+                {{ icon(['M9 12l2 2 4-4m5.6-3.1a11.9 11.9 0 01-8.6 3.7A11.9 11.9 0 013.4 8.9 12 12 0 003 12c0 5.2 3.4 9.6 8 11.2 4.6-1.6 8-6 8-11.2 0-1.1-.1-2.1-.4-3.1z']) }}
+                <span class="flex-1 truncate">Administración</span>
+            </a>
+            {% endif %}
         </nav>
 
         <div class="px-3 py-3 border-t border-gray-800">

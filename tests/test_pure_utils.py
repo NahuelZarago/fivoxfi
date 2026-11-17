@@ -217,3 +217,61 @@ def test_password_checks():
     assert c['length'] and c['upper'] and c['lower'] and c['digit'] and not c['symbol'] and not c['long']
     score, c = password_checks('Clave-Muy-Larga-1234!')
     assert score == 6
+
+
+# ── v4: precios, xlsx, csv ────────────────────────────────
+def test_parse_percent():
+    from decimal import Decimal
+    from app.utils.validation import ValidationFailure, parse_percent
+    assert parse_percent('8') == Decimal('8')
+    assert parse_percent(' 10,5 ') == Decimal('10.5')
+    assert parse_percent('-10') == Decimal('-10')
+    for bad in ('', 'abc', '0', '-95', '501', '1e2', '8%', '--3'):
+        with pytest.raises(ValidationFailure):
+            parse_percent(bad)
+
+
+def test_compute_new_price():
+    from decimal import Decimal
+    from app.utils.pricing import compute_new_price
+    assert compute_new_price('100.00', Decimal('8')) == Decimal('108.00')
+    assert compute_new_price('10.05', Decimal('10')) == Decimal('11.06')       # 11.055 -> mitad hacia arriba
+    assert compute_new_price('150', Decimal('-10')) == Decimal('135.00')
+    assert compute_new_price('1234.00', Decimal('8'), Decimal('10')) == Decimal('1330.00')   # 1332.72 -> 1330
+    assert compute_new_price('1234.00', Decimal('8'), Decimal('100')) == Decimal('1300.00')
+    assert compute_new_price('0', Decimal('50')) == Decimal('0.00')
+
+
+def test_xlsx_roundtrip_and_formula_safety():
+    openpyxl = pytest.importorskip('openpyxl')
+    import io
+    from datetime import datetime
+    from decimal import Decimal
+    from app.utils.xlsx import DATETIME, INT, MONEY, TEXT, build_xlsx
+    cols = [('Nombre', TEXT, 20), ('Precio', MONEY, 10), ('Stock', INT, 8), ('Fecha', DATETIME, 18)]
+    data = build_xlsx('Hoja/1', cols, [['=HYPERLINK("x")<b>', Decimal('1234.50'), 3, datetime(2026, 3, 1, 10, 30)], ['Ñandú', Decimal('0'), 0, None]])
+    ws = openpyxl.load_workbook(io.BytesIO(data)).active
+    rows = list(ws.iter_rows(values_only=True))
+    assert rows[0] == ('Nombre', 'Precio', 'Stock', 'Fecha')
+    assert rows[1][0] == '=HYPERLINK("x")<b>' and ws['A2'].data_type == 's'    # texto, no fórmula
+    assert rows[1][1] == 1234.5 and rows[1][2] == 3 and rows[1][3] == datetime(2026, 3, 1, 10, 30)
+    assert rows[2][0] == 'Ñandú'
+    assert ws.freeze_panes == 'A2' and ws.auto_filter.ref == 'A1:D3'
+
+
+def test_xlsx_strips_control_chars():
+    from app.utils.xlsx import TEXT, build_xlsx
+    import zipfile, io
+    data = build_xlsx('x', [('A', TEXT, 5)], [['ok\x00\x08bad']])
+    assert b'\x00' not in zipfile.ZipFile(io.BytesIO(data)).read('xl/worksheets/sheet1.xml')
+
+
+def test_csv_format_and_injection():
+    from decimal import Decimal
+    from app.utils.xlsx import MONEY, TEXT, build_csv
+    out = build_csv([('Nombre', TEXT, 5), ('Precio', MONEY, 5)], [['=SUM(A1)', Decimal('1234.5')], ['Té', Decimal('2')]])
+    assert out.startswith(b'\xef\xbb\xbf')
+    text = out.decode('utf-8-sig').splitlines()
+    assert text[0] == 'Nombre;Precio'
+    assert text[1] == "'=SUM(A1);1234,50"
+    assert text[2] == 'Té;2,00'

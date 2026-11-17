@@ -122,3 +122,16 @@ def password_checks(raw):
         'symbol': bool(re.search(r'[^A-Za-z0-9]', password)),
     }
     return sum(checks.values()), checks
+
+
+def parse_percent(raw, label='El porcentaje', minimum=Decimal('-90'), maximum=Decimal('500')):
+    """Porcentaje con hasta 2 decimales ('8', '8,5', '-10.25'). Rechaza 0 (no cambiaría nada)."""
+    text = str(raw if raw is not None else '').strip().replace(' ', '').replace(',', '.')
+    if not re.match(r'^-?\d{1,4}(\.\d{1,2})?$', text):
+        raise ValidationFailure(f'{label} no es válido. Usá un número como 8 o -10,5.')
+    value = Decimal(text)
+    if value == 0:
+        raise ValidationFailure(f'{label} no puede ser 0: no cambiaría ningún precio.')
+    if value < minimum or value > maximum:
+        raise ValidationFailure(f'{label} debe estar entre {minimum} y {maximum}.')
+    return value

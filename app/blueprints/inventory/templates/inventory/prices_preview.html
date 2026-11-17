@@ -1,0 +1,51 @@
+{% extends "base_app.html" %}
+{% block title %}Vista previa de precios{% endblock %}
+{% block content %}
+<a href="{{ url_for('inventory.price_update') }}" class="text-sm text-gray-500 hover:underline">← Volver y cambiar los valores</a>
+<div class="mt-2 mb-6">
+    <h1 class="text-2xl font-bold">Revisá antes de guardar</h1>
+    <p class="text-gray-500 text-sm mt-1">
+        <strong class="{{ 'text-green-700' if data.percent > 0 else 'text-red-600' }}">{{ '+' if data.percent > 0 }}{{ data.percent }}%</strong>
+        · {{ applies[data.applies_to] }} · {{ roundings[data.rounding][1] }}
+        {% if data.search %}· productos que contienen "<strong>{{ data.search }}</strong>"{% else %}· todos los productos activos{% endif %}
+    </p>
+</div>
+
+<div class="bg-amber-50 border border-amber-200 text-amber-900 text-sm rounded-2xl px-4 py-3 mb-5 max-w-3xl">
+    Se van a modificar <strong>{{ total }}</strong> producto{{ 's' if total != 1 }}{% if unchanged %} ({{ unchanged }} quedan igual){% endif %}.
+    {% if total > rows|length %}Abajo se muestran los primeros {{ rows|length }}.{% endif %}
+    Los precios finales se calculan al confirmar, con los valores vigentes en ese momento.
+</div>
+
+<div class="bg-white rounded-2xl border border-gray-200 overflow-x-auto mb-6">
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b text-xs uppercase text-gray-500"><tr>
+            <th class="text-left px-4 py-3">Producto</th>
+            <th class="text-right px-4 py-3">Compra: antes</th><th class="text-right px-4 py-3">Compra: después</th>
+            <th class="text-right px-4 py-3">Venta: antes</th><th class="text-right px-4 py-3">Venta: después</th></tr></thead>
+        <tbody class="divide-y divide-gray-100">
+        {% for r in rows %}
+            <tr>
+                <td class="px-4 py-2.5 font-medium">{{ r.name }}</td>
+                <td class="px-4 py-2.5 text-right text-gray-500">{{ r.old_cost|money }}</td>
+                <td class="px-4 py-2.5 text-right {{ 'font-semibold' if r.new_cost != r.old_cost }}">{{ r.new_cost|money }}</td>
+                <td class="px-4 py-2.5 text-right text-gray-500">{{ r.old_sale|money }}</td>
+                <td class="px-4 py-2.5 text-right {{ 'font-semibold text-green-700' if r.new_sale != r.old_sale }}">{{ r.new_sale|money }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<form method="POST" action="{{ url_for('inventory.price_apply') }}" class="flex flex-wrap items-center gap-3">
+    {{ csrf_input() }}
+    <input type="hidden" name="direction" value="{{ 'up' if data.percent > 0 else 'down' }}">
+    <input type="hidden" name="percent" value="{{ data.percent|abs }}">
+    <input type="hidden" name="applies_to" value="{{ data.applies_to }}">
+    <input type="hidden" name="rounding" value="{{ data.rounding }}">
+    <input type="hidden" name="scope" value="{{ data.scope }}">
+    <input type="hidden" name="search" value="{{ data.search }}">
+    <button class="bg-green-600 text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-green-700 text-sm">Confirmar y actualizar {{ total }} producto{{ 's' if total != 1 }}</button>
+    <a href="{{ url_for('inventory.price_update') }}" class="text-sm text-gray-500 hover:underline">Cancelar</a>
+</form>
+{% endblock %}

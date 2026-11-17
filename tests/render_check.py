@@ -72,6 +72,12 @@ metrics = {'today': {'income': Decimal('10'), 'profit': Decimal('4'), 'count': 1
 close = {'rows': [{'method': 'cash', 'total': Decimal('5'), 'profit': Decimal('2'), 'count': 1}], 'total': Decimal('5'), 'profit': Decimal('2'), 'count': 1}
 member = NS(id=2, username='Luis', email='l@x.com', role_label='Empleado', is_active=True, is_owner=False)
 
+from app.utils.pricing import APPLIES_TO, ROUNDING_OPTIONS
+batches = [{'batch_id': 11, 'created_at': datetime(2026, 3, 1, 12), 'percent': Decimal('8.00'), 'applies_to': 'sale', 'count': 3, 'reverted': 0, 'user': 'Ana <script>'},
+           {'batch_id': 12, 'created_at': datetime(2026, 3, 1, 12), 'percent': Decimal('-5.00'), 'applies_to': 'both', 'count': 2, 'reverted': 2, 'user': 'Luis'}]
+price_row = NS(name='Yerba <img src=x onerror=alert(1)>', old_cost=Decimal('100'), new_cost=Decimal('108'), old_sale=Decimal('150'), new_sale=Decimal('162'))
+pdata = {'percent': Decimal('8.00'), 'applies_to': 'sale', 'rounding': 'none', 'search': '<img src=x onerror=1>', 'scope': 'search'}
+
 cases = [
     ('public/index.html', {}, 'owner'), ('public/contact.html', {}, 'owner'), ('public/product_landing.html', {'slug': 's'}, 'owner'),
     ('auth/login.html', {'email': 'a@b.com', 'error': None}, 'owner'), ('auth/login.html', {'email': 'a@b.com', 'error': 'Email o contraseña incorrectos.'}, 'owner'), ('auth/register.html', {'form': {'username': 'x', 'email': 'y'}, 'errors': {}}, 'owner'), ('auth/register.html', {'form': {'username': '', 'email': 'y'}, 'errors': {'username': 'El nombre es obligatorio.', 'email': 'Email inválido', 'password': 'x', 'confirm_password': 'y'}}, 'owner'),
@@ -88,6 +94,14 @@ cases = [
     ('inventory/form.html', {'product': None, 'form': {}}, 'owner'), ('inventory/form.html', {'product': prod(), 'form': {}}, 'owner'),
     ('inventory/form.html', {'product': None, 'form': {'name': 'zz', 'stock': '4'}}, 'owner'),
     ('inventory/stock.html', {'product': prod(), 'movements': Page([mv])}, 'owner'), ('inventory/stock.html', {'product': prod(), 'movements': Page([mv])}, 'employee'),
+    ('inventory/prices.html', {'form': {}, 'applies': APPLIES_TO, 'roundings': ROUNDING_OPTIONS, 'batches': batches}, 'owner'),
+    ('inventory/prices.html', {'form': {'percent': '8<script>', 'scope': 'search', 'search': '<img src=x onerror=1>'}, 'applies': APPLIES_TO, 'roundings': ROUNDING_OPTIONS, 'batches': []}, 'owner'),
+    ('inventory/prices_preview.html', {'rows': [price_row], 'total': 150, 'unchanged': 2, 'data': pdata, 'applies': APPLIES_TO, 'roundings': ROUNDING_OPTIONS}, 'owner'),
+    ('exports/index.html', {'today': date(2026, 3, 2), 'month_ago': date(2026, 2, 2), 'can_costs': True}, 'owner'),
+    ('exports/index.html', {'today': date(2026, 3, 2), 'month_ago': date(2026, 2, 2), 'can_costs': False}, 'owner'),
+    ('admin/index.html', {'s': {k: 1 for k in ('tenants','tenants_active','users','unverified','no_business','new_users_week','new_tenants_week','products','sales')}}, 'owner'),
+    ('admin/tenants.html', {'rows': Page([(NS(id=1, name='Kiosco <b>Pepe</b>', plan='basic', is_active=True, created_at=datetime(2026,3,1)), 3, 4, 5, 'o@x.com')]), 'q': '<script>', 'plans': ['basic', 'pro']}, 'owner'),
+    ('admin/users.html', {'rows': Page([NS(id=5, username='Ana <script>', email='a@x.com', role_label='Empleado', tenant=tenant, is_active=True, is_email_confirmed=False, is_superadmin=False, is_owner=False, tenant_id=1)]), 'q': ''}, 'owner'),
     ('inventory/movements.html', {'rows': Page([(mv, 'Yerba')]), 'reason': '', 'reasons': labels}, 'owner'),
     ('pos/terminal.html', {'products': [{'id': 1, 'name': '</script><b>', 'sku': '', 'price': '10.00', 'stock': 3}], 'methods': [('cash', 'Efectivo')]}, 'employee'),
     ('reports/daily_close.html', {'close': close, 'day': date(2026, 3, 1), 'today': date(2026, 3, 2), 'prev_day': date(2026, 2, 28), 'next_day': date(2026, 3, 2)}, 'owner'),

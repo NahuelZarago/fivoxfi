@@ -1,3 +1,5 @@
+import re
+
 from flask import flash, redirect, render_template, request, url_for
 from flask_login import current_user
 from sqlalchemy.exc import IntegrityError
@@ -6,13 +8,15 @@ from . import inventory_bp
 from ...extensions import db
 from ...models.product import DEFAULT_LOW_STOCK_THRESHOLD, Product
 from ...models.stock_movement import REASON_INITIAL, REASON_LABELS, StockMovement
+from ...services import pricing
 from ...services.inventory import apply_movement, lock_products, register_manual_movement
 from ...utils.decorators import login_required_with_tenant, require
 from ...utils.permissions import (
     INVENTORY_MANAGE, INVENTORY_VIEW, REPORTS_VIEW, STOCK_ADJUST, STOCK_ENTRY)
+from ...utils.pricing import APPLIES_TO, ROUNDING_OPTIONS
 from ...utils.text import escape_like
 from ...utils.validation import (
-    ValidationFailure, clean_multiline, clean_text, parse_int, parse_money)
+    ValidationFailure, clean_multiline, clean_text, parse_int, parse_money, parse_percent)
 
 PER_PAGE = 25
 
@@ -179,3 +183,87 @@ def movement_list():
     rows = (query.order_by(StockMovement.created_at.desc(), StockMovement.id.desc())
             .paginate(page=page, per_page=PER_PAGE, error_out=False))
     return render_template('inventory/movements.html', rows=rows, reason=reason, reasons=REASON_LABELS)
+
+
+# ─── ACTUALIZACIÓN MASIVA DE PRECIOS ────────────────────────
+_UUID_RE = re.compile(r'^[0-9a-f-]{36}$')
+
+
+def _price_form(form):
+    """Lee y valida el formulario de precios. Devuelve dict con valores ya limpios."""
+    percent = parse_percent(form.get('percent', ''))
+    percent = abs(percent) if form.get('direction', 'up') == 'up' else -abs(percent)
+    if percent < -90:
+        raise ValidationFailure('No se puede bajar más de un 90%.')
+    applies_to = form.get('applies_to', 'sale')
+    rounding = form.get('rounding', 'none')
+    if applies_to not in APPLIES_TO:
+        raise ValidationFailure('Elegí qué precio actualizar.')
+    if rounding not in ROUNDING_OPTIONS:
+        raise ValidationFailure('Redondeo inválido.')
+    search = clean_text(form.get('search', ''), 'La búsqueda', max_len=100, required=False) or ''
+    scope = form.get('scope', 'all')
+    if scope == 'search' and not search:
+        raise ValidationFailure('Escribí qué productos querés actualizar (por ejemplo "yerba").')
+    if scope != 'search':
+        search = ''
+    return {'percent': percent, 'applies_to': applies_to, 'rounding': rounding, 'search': search, 'scope': scope}
+
+
+@inventory_bp.route('/precios')
+@login_required_with_tenant
+@require(INVENTORY_MANAGE)
+def price_update():
+    return render_template('inventory/prices.html', form={}, applies=APPLIES_TO, roundings=ROUNDING_OPTIONS,
+                           batches=pricing.list_batches(current_user.tenant_id))
+
+
+@inventory_bp.route('/precios/vista-previa', methods=['POST'])
+@login_required_with_tenant
+@require(INVENTORY_MANAGE)
+def price_preview():
+    try:
+        data = _price_form(request.form)
+        rows, unchanged = pricing.build_preview(current_user.tenant_id, data['percent'], data['applies_to'],
+                                                data['rounding'], data['search'])
+        if not rows:
+            raise ValidationFailure('Ningún producto cambiaría de precio con esos valores.')
+    except ValidationFailure as exc:
+        flash(str(exc), 'danger')
+        return render_template('inventory/prices.html', form=request.form, applies=APPLIES_TO,
+                               roundings=ROUNDING_OPTIONS,
+                               batches=pricing.list_batches(current_user.tenant_id)), 400
+    return render_template('inventory/prices_preview.html', rows=rows[:100], total=len(rows), unchanged=unchanged,
+                           data=data, applies=APPLIES_TO, roundings=ROUNDING_OPTIONS)
+
+
+@inventory_bp.route('/precios/aplicar', methods=['POST'])
+@login_required_with_tenant
+@require(INVENTORY_MANAGE)
+def price_apply():
+    try:
+        data = _price_form(request.form)
+        _, count = pricing.apply_update(current_user.tenant_id, current_user.id, data['percent'],
+                                        data['applies_to'], data['rounding'], data['search'])
+    except ValidationFailure as exc:
+        flash(str(exc), 'danger')
+        return redirect(url_for('inventory.price_update'))
+    flash(f'Listo: se actualizaron los precios de {count} producto{"s" if count != 1 else ""}. '
+          'Si te equivocaste, podés revertirlo desde el historial.', 'success')
+    return redirect(url_for('inventory.price_update'))
+
+
+@inventory_bp.route('/precios/revertir/<batch_id>', methods=['POST'])
+@login_required_with_tenant
+@require(INVENTORY_MANAGE)
+def price_revert(batch_id):
+    if not _UUID_RE.match(batch_id):
+        flash('Operación inválida.', 'danger')
+        return redirect(url_for('inventory.price_update'))
+    try:
+        restored, skipped = pricing.revert_batch(current_user.tenant_id, current_user.id, batch_id)
+        extra = f' ({skipped} no se tocaron porque su precio cambió después)' if skipped else ''
+        flash(f'Se restauraron los precios anteriores de {restored} producto{"s" if restored != 1 else ""}{extra}.', 'success')
+    except ValidationFailure as exc:
+        flash(str(exc), 'danger')
+    return redirect(url_for('inventory.price_update'))

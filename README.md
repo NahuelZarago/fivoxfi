@@ -25,6 +25,19 @@ Con Docker: `docker compose up --build` (levanta Postgres, Redis y la app en :80
 > **Base existente (v2):** `flask --app run db upgrade` aplica la migración `004` sin perder datos:
 > renombra el rol `seller→employee`, crea códigos de cliente, corrige negativos, y registra el stock actual como "stock inicial".
 
+## Novedades v4
+- **Actualizar precios por %** (Inventario → *Actualizar precios*): subir o bajar costo, venta o ambos; redondeo; a todos o por búsqueda; vista previa, historial y **revertir**.
+- **Exportar datos** (*Exportar datos*): productos, ventas y movimientos en Excel (.xlsx) o CSV. Sin librerías extra.
+- **Panel de administrador** (`/admin`): estadísticas, negocios (suspender, plan, eliminar) y usuarios (activar, verificar email, eliminar). Para los demás usuarios la ruta responde 404.
+- **Eliminar mi cuenta** (Configuración) para empleados y clientes.
+
+Para ser administrador (una sola vez, con la cuenta ya registrada):
+```bash
+docker compose exec web flask --app run make-admin tu@email.com   # sin Docker: flask --app run make-admin tu@email.com
+# para quitarlo: flask --app run remove-admin tu@email.com
+```
+La migración `005` (columna `is_superadmin` y tabla `price_changes`) se aplica sola con `db upgrade`.
+
 ## Tests
 ```bash
 python tests/static_checks.py   # plantillas, endpoints, imports, CSRF en formularios
@@ -49,4 +62,4 @@ Sugerido: correr `pytest` con `TEST_DATABASE_URL` apuntando a un Postgres para v
 - **Mercado Pago / tarjeta**: cobro de suscripción y/o ventas. Ya está preparado el terreno: `@csrf_exempt` para webhooks firmados y el medio de pago `mercadopago` en `services/sales.py`.
 - **Inicio de sesión con Google** (OAuth): hay un comentario en `auth/login.html` donde va el botón.
 - Módulo **Turnos y Recordatorios** (hoy en mantenimiento, `app/blueprints/appointments`).
-- Ideas: numeración de ventas por negocio, CSP estricta, exportar a Excel/CSV, 2FA para dueños.
+- Ideas: numeración de ventas por negocio, CSP estricta, 2FA para dueños.

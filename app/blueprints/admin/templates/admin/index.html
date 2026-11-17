@@ -1,0 +1,21 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Administración{% endblock %}
+{% block admin_content %}
+<h1 class="text-2xl font-bold mb-5">Resumen de la plataforma</h1>
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    {% for label, value, hint in [
+        ('Negocios', s.tenants, s.tenants_active ~ ' activos'),
+        ('Usuarios', s.users, s.new_users_week ~ ' nuevos esta semana'),
+        ('Sin verificar', s.unverified, 'email sin confirmar'),
+        ('Sin negocio', s.no_business, 'cuentas sin unirse a uno'),
+        ('Negocios nuevos', s.new_tenants_week, 'últimos 7 días'),
+        ('Productos', s.products, 'en toda la plataforma'),
+        ('Ventas', s.sales, 'sin contar anuladas')] %}
+    <div class="bg-white rounded-2xl border border-gray-200 p-5">
+        <p class="text-xs uppercase tracking-wide text-gray-500">{{ label }}</p>
+        <p class="text-3xl font-bold mt-1">{{ value }}</p>
+        <p class="text-xs text-gray-400 mt-1">{{ hint }}</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

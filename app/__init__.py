@@ -50,6 +50,8 @@ def create_app(config_name=None):
     register_context(app)
     register_error_handlers(app)
     _register_blueprints(app)
+    from .cli import register_cli
+    register_cli(app)
     _register_health_check(app)
     _register_security_headers(app)
     return app
@@ -78,9 +80,11 @@ def _configure_logging(app):
 
 
 def _register_blueprints(app):
+    from .blueprints.admin import admin_bp
     from .blueprints.appointments import appointments_bp
     from .blueprints.auth import auth_bp
     from .blueprints.dashboard import dashboard_bp
+    from .blueprints.exports import exports_bp
     from .blueprints.inventory import inventory_bp
     from .blueprints.pos import pos_bp
     from .blueprints.public import public_bp
@@ -92,6 +96,8 @@ def _register_blueprints(app):
     app.register_blueprint(inventory_bp, url_prefix='/app/inventory')
     app.register_blueprint(pos_bp, url_prefix='/app/pos')
     app.register_blueprint(reports_bp, url_prefix='/app/reports')
+    app.register_blueprint(admin_bp, url_prefix='/admin')
+    app.register_blueprint(exports_bp, url_prefix='/app/exportar')
     app.register_blueprint(appointments_bp, url_prefix='/app/turnos')
 
 

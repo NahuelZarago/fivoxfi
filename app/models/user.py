@@ -19,6 +19,8 @@ class User(UserMixin, db.Model):
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     is_email_confirmed = db.Column(db.Boolean, default=False, nullable=False)
     # Se incrementa al cambiar la contraseña: invalida sesiones y cookies "recordarme" viejas.
+    # Administrador de la plataforma (vos). Solo se asigna por comando: flask --app run make-admin EMAIL
+    is_superadmin = db.Column(db.Boolean, default=False, nullable=False, server_default=db.false())
     auth_version = db.Column(db.Integer, default=0, nullable=False, server_default='0')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -52,6 +54,8 @@ class User(UserMixin, db.Model):
 
     @property
     def role_label(self):
+        if self.is_superadmin and not self.has_role:
+            return 'Administrador'
         return ROLE_LABELS.get(self.role, 'Sin rol')
 
     def __repr__(self):

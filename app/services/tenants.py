@@ -89,6 +89,7 @@ def delete_tenant(tenant):
     Todo en una sola transacción: o se borra todo o no se borra nada.
     """
     from ..models.product import Product
+    from ..models.price_change import PriceChange
     from ..models.sale import Sale, SaleItem
     from ..models.stock_movement import StockMovement
 
@@ -96,6 +97,7 @@ def delete_tenant(tenant):
     try:
         sale_ids = db.session.query(Sale.id).filter(Sale.tenant_id == tid)
         StockMovement.query.filter_by(tenant_id=tid).delete(synchronize_session=False)
+        PriceChange.query.filter_by(tenant_id=tid).delete(synchronize_session=False)
         SaleItem.query.filter(SaleItem.sale_id.in_(sale_ids)).delete(synchronize_session=False)
         Sale.query.filter_by(tenant_id=tid).delete(synchronize_session=False)
         Product.query.filter_by(tenant_id=tid).delete(synchronize_session=False)

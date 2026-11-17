@@ -1,0 +1,46 @@
+{% extends "base_app.html" %}
+{% block title %}Exportar datos{% endblock %}
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-2xl font-bold">Exportar datos</h1>
+    <p class="text-gray-500 text-sm mt-1">Descargá tu información en Excel (.xlsx) o CSV para tu contador o para hacer tus propios cálculos.</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+    <section class="bg-white rounded-2xl border border-gray-200 p-6">
+        <h2 class="font-bold mb-1">Productos</h2>
+        <p class="text-sm text-gray-500 mb-4">Todo el inventario con stock{% if can_costs %}, costos, márgenes y valor del stock{% endif %}.</p>
+        <div class="flex gap-2">
+            <a href="{{ url_for('exports.download', kind='productos') }}" class="bg-green-600 text-white font-semibold px-4 py-2 rounded-xl hover:bg-green-700 text-sm">Excel</a>
+            <a href="{{ url_for('exports.download', kind='productos', formato='csv') }}" class="border border-gray-300 font-semibold px-4 py-2 rounded-xl hover:bg-gray-50 text-sm">CSV</a>
+        </div>
+    </section>
+
+    <form method="GET" action="{{ url_for('exports.download', kind='ventas') }}" class="bg-white rounded-2xl border border-gray-200 p-6">
+        <h2 class="font-bold mb-1">Ventas</h2>
+        <p class="text-sm text-gray-500 mb-4">Una fila por producto vendido, con ganancia y medio de pago.</p>
+        <div class="grid grid-cols-2 gap-3 mb-3">
+            <label class="text-xs font-medium">Desde<input type="date" name="desde" value="{{ month_ago.isoformat() }}" class="mt-1 w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50"></label>
+            <label class="text-xs font-medium">Hasta<input type="date" name="hasta" value="{{ today.isoformat() }}" class="mt-1 w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50"></label>
+        </div>
+        <label class="flex items-center gap-2 text-sm mb-4"><input type="checkbox" name="anuladas" value="1" class="text-green-600"> Incluir ventas anuladas</label>
+        <div class="flex gap-2">
+            <button class="bg-green-600 text-white font-semibold px-4 py-2 rounded-xl hover:bg-green-700 text-sm">Excel</button>
+            <button name="formato" value="csv" class="border border-gray-300 font-semibold px-4 py-2 rounded-xl hover:bg-gray-50 text-sm">CSV</button>
+        </div>
+    </form>
+
+    <form method="GET" action="{{ url_for('exports.download', kind='movimientos') }}" class="bg-white rounded-2xl border border-gray-200 p-6">
+        <h2 class="font-bold mb-1">Movimientos de stock</h2>
+        <p class="text-sm text-gray-500 mb-4">Compras, ventas, mermas y ajustes del período.</p>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <label class="text-xs font-medium">Desde<input type="date" name="desde" value="{{ month_ago.isoformat() }}" class="mt-1 w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50"></label>
+            <label class="text-xs font-medium">Hasta<input type="date" name="hasta" value="{{ today.isoformat() }}" class="mt-1 w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50"></label>
+        </div>
+        <div class="flex gap-2">
+            <button class="bg-green-600 text-white font-semibold px-4 py-2 rounded-xl hover:bg-green-700 text-sm">Excel</button>
+            <button name="formato" value="csv" class="border border-gray-300 font-semibold px-4 py-2 rounded-xl hover:bg-gray-50 text-sm">CSV</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

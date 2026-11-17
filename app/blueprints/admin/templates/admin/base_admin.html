@@ -1,0 +1,10 @@
+{% extends "base_app.html" %}
+{% block content %}
+<div class="flex items-center gap-2 mb-6 flex-wrap">
+    <span class="text-xs font-bold uppercase tracking-wider bg-red-100 text-red-700 px-2 py-1 rounded">Administrador</span>
+    {% for ep, label in [('admin.index', 'Resumen'), ('admin.tenants', 'Negocios'), ('admin.users', 'Usuarios')] %}
+    <a href="{{ url_for(ep) }}" class="px-3 py-1.5 rounded-lg text-sm font-medium {{ 'bg-green-600 text-white' if request.endpoint == ep else 'text-gray-600 hover:bg-gray-100' }}">{{ label }}</a>
+    {% endfor %}
+</div>
+{% block admin_content %}{% endblock %}
+{% endblock %}

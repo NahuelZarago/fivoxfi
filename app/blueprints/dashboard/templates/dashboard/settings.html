@@ -58,6 +58,26 @@
     </form>
     {% endif %}
 
+    {% if not current_user.is_owner %}
+    <form method="POST" action="{{ url_for('dashboard.delete_account') }}" id="deleteAccountForm"
+          class="lg:col-span-2 bg-white rounded-2xl border-2 border-red-200 p-6 space-y-4">
+        {{ csrf_input() }}
+        <h2 class="font-bold text-red-700">Eliminar mi cuenta</h2>
+        <p class="text-sm text-gray-600">Se borra tu usuario para siempre y dejás de pertenecer a <strong>{{ current_user.tenant.name }}</strong>. Las ventas que registraste se conservan en el negocio, sin tu nombre.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+                <label class="block text-sm font-medium mb-1.5" for="confirm_email">Escribí tu email para confirmar</label>
+                <input id="confirm_email" name="confirm_email" autocomplete="off" placeholder="{{ current_user.email }}" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 bg-gray-50">
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1.5" for="account_password">Tu contraseña</label>
+                <input id="account_password" type="password" name="password" autocomplete="current-password" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 bg-gray-50">
+            </div>
+        </div>
+        <button type="submit" class="bg-red-600 text-white font-semibold px-4 py-2 rounded-xl hover:bg-red-700 text-sm">Eliminar mi cuenta definitivamente</button>
+    </form>
+    {% endif %}
+
     <div class="bg-white rounded-2xl border border-gray-200 p-6">
         <h2 class="font-bold mb-2">Ayuda</h2>
         <p class="text-sm text-gray-500 mb-4">¿Algo no funciona? Escribinos y te ayudamos.</p>
@@ -70,6 +90,10 @@
 <script src="{{ url_for('static', filename='js/auth-forms.js') }}"></script>
 <script>
 (function () {
+    var acc = document.getElementById('deleteAccountForm');
+    if (acc) acc.addEventListener('submit', function (e) {
+        if (!confirm('¿Seguro? Tu cuenta se elimina de forma definitiva.')) e.preventDefault();
+    });
     var name = document.getElementById('confirm_name'), pass = document.getElementById('delete_password'), btn = document.getElementById('deleteBtn');
     if (!name) return;
     function sync() { btn.disabled = !(name.value.trim() === name.dataset.expected && pass.value); }

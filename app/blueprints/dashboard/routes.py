@@ -4,7 +4,7 @@ from flask_login import current_user, login_user, logout_user
 from . import dashboard_bp
 from ...extensions import db, limiter
 from ...models.user import User
-from ...services import metrics
+from ...services import accounts, metrics
 from ...services.tenants import check_employee_limit, delete_tenant, regenerate_code
 from ...utils.decorators import login_required_with_tenant, require
 from ...utils.permissions import (
@@ -160,3 +160,25 @@ def delete_business():
     logout_user()
     flash(f'El negocio "{name}" y todos sus datos fueron eliminados. Tu cuenta sigue activa: iniciá sesión para crear otro negocio.', 'success')
     return redirect(url_for('auth.login'))
+
+
+# ─── ELIMINAR MI CUENTA ─────────────────────────────────────
+@dashboard_bp.route('/configuracion/eliminar-cuenta', methods=['POST'])
+@login_required_with_tenant
+@limiter.limit('5 per hour')
+def delete_account():
+    """Cada persona puede borrar su propia cuenta (empleados y clientes). El dueño primero elimina el negocio."""
+    if not current_user.check_password(request.form.get('password', '')):
+        flash('Contraseña incorrecta. No se eliminó nada.', 'danger')
+        return redirect(url_for('dashboard.settings'))
+    if request.form.get('confirm_email', '').strip().lower() != current_user.email:
+        flash('El email que escribiste no coincide con el de tu cuenta. No se eliminó nada.', 'danger')
+        return redirect(url_for('dashboard.settings'))
+    try:
+        accounts.delete_user(current_user._get_current_object())
+    except ValidationFailure as exc:
+        flash(str(exc), 'danger')
+        return redirect(url_for('dashboard.settings'))
+    logout_user()
+    flash('Tu cuenta fue eliminada. ¡Gracias por haber usado Fivox!', 'success')
+    return redirect(url_for('public.index'))

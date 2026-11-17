@@ -47,3 +47,17 @@ def require(capability):
             return f(*args, **kwargs)
         return decorated
     return wrapper
+
+
+def superadmin_required(f):
+    """
+    Solo el administrador de la plataforma. A cualquier otra persona (o a un visitante) le
+    responde 404, como si la sección no existiera: no se revela que hay un panel.
+    """
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not (current_user.is_authenticated and current_user.is_superadmin
+                and current_user.is_active and current_user.is_email_confirmed):
+            abort(404)
+        return f(*args, **kwargs)
+    return decorated
