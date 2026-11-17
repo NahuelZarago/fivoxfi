@@ -1,3 +1,4 @@
+{% from '_macros.html' import theme_toggle %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -59,6 +60,7 @@
             <a href="{{ url_for('public.contact') }}" class="text-sm text-gray-500 hover:text-gray-900 font-medium transition-colors">Contacto</a>
         </div>
         <div class="flex items-center gap-3">
+            {{ theme_toggle('icon') }}
             <a href="{{ url_for('auth.login') }}" class="text-sm text-gray-600 hover:text-gray-900 font-semibold transition-colors">
                 Ingresar
             </a>

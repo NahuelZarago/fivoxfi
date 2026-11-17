@@ -86,3 +86,7 @@ Sugerido: correr `pytest` con `TEST_DATABASE_URL` apuntando a un Postgres para v
 - **Mercado Pago / tarjeta**: cobro de suscripción y/o ventas. Ya está preparado el terreno: `@csrf_exempt` para webhooks firmados y el medio de pago `mercadopago` en `services/sales.py`.
 - Módulo **Turnos y Recordatorios** (hoy en mantenimiento, `app/blueprints/appointments`).
 - Ideas: numeración de ventas por negocio, CSP estricta, 2FA para dueños.
+
+## Modo claro / oscuro
+
+Cada persona elige su tema con el botón **Modo oscuro / Modo claro** (al pie del menú lateral, y arriba a la derecha en login y registro). La elección queda guardada en el navegador; si nunca la tocó, se usa la configuración del sistema. La página pública (landing, contacto) y los comprobantes imprimibles se mantienen siempre claros. Los colores oscuros viven en `app/static/css/dark.css`; `tests/test_theme.py` falla si una plantilla usa un color sin versión oscura.

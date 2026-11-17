@@ -1,0 +1,72 @@
+/* Modo oscuro de Fivox.
+   Las pantallas están hechas con clases de Tailwind (bg-white, text-gray-500...). En vez de duplicar cada
+   clase con "dark:", acá se redefine el color de esas clases cuando <html> tiene la clase "dark".
+   Si agregás una clase de color nueva en una plantilla, tests/test_theme.py te avisa si falta acá. */
+
+/* Botón de cambio de tema: en claro se ve la luna ("Modo oscuro"); en oscuro, el sol ("Modo claro"). */
+.theme-icon-sun, .theme-label-dark { display: none; }
+html.dark .theme-icon-moon, html.dark .theme-label-light { display: none; }
+html.dark .theme-icon-sun { display: inline-block; }
+html.dark .theme-label-dark { display: inline; }
+
+html.dark { color-scheme: dark; }
+html.dark body.bg-gray-50, html.dark body.bg-white { background-color: #0b0f19; }
+html.dark body.bg-gradient-to-br { background-image: linear-gradient(to bottom right, #0b0f19, #0e2a1c); }
+
+/* Superficies */
+html.dark .bg-white { background-color: #111827; }
+html.dark .bg-gray-50 { background-color: #1a2333; }
+html.dark .bg-gray-100 { background-color: #1f2937; }
+html.dark .bg-gray-200 { background-color: #374151; }
+html.dark .bg-gray-900 { background-color: #374151; }
+html.dark .hover\:bg-black:hover { background-color: #4b5563; }
+html.dark .hover\:bg-gray-50:hover { background-color: #1f2937; }
+html.dark .hover\:bg-gray-100:hover { background-color: #263244; }
+
+/* Texto */
+html.dark .text-gray-900 { color: #f9fafb; }
+html.dark .text-gray-700 { color: #e5e7eb; }
+html.dark .text-gray-600 { color: #d1d5db; }
+html.dark .text-gray-500 { color: #9ca3af; }
+html.dark .text-gray-400 { color: #8b94a5; }
+html.dark .hover\:text-gray-900:hover, html.dark .hover\:text-gray-800:hover, html.dark .hover\:text-gray-700:hover { color: #ffffff; }
+
+/* Bordes y separadores */
+html.dark .border-gray-50, html.dark .border-gray-100, html.dark .border-gray-200 { border-color: #263244; }
+html.dark .border-gray-300 { border-color: #374151; }
+html.dark .hover\:border-gray-300:hover { border-color: #4b5563; }
+html.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) { border-color: #1f2937; }
+
+/* Verdes */
+html.dark .bg-green-50 { background-color: rgba(42, 157, 95, 0.12); }
+html.dark .bg-green-100 { background-color: rgba(42, 157, 95, 0.22); }
+html.dark .hover\:bg-green-50:hover { background-color: rgba(42, 157, 95, 0.18); }
+html.dark .border-green-200 { border-color: rgba(79, 184, 122, 0.4); }
+html.dark .text-green-600, html.dark .text-green-700 { color: #4fb87a; }
+html.dark .text-green-800 { color: #82d29d; }
+
+/* Rojos */
+html.dark .bg-red-50 { background-color: rgba(239, 68, 68, 0.12); }
+html.dark .bg-red-100 { background-color: rgba(239, 68, 68, 0.22); }
+html.dark .border-red-200 { border-color: rgba(248, 113, 113, 0.4); }
+html.dark .text-red-600 { color: #f87171; }
+html.dark .text-red-700 { color: #fca5a5; }
+html.dark .text-red-800 { color: #fecaca; }
+
+/* Ámbar */
+html.dark .bg-amber-50 { background-color: rgba(245, 158, 11, 0.12); }
+html.dark .bg-amber-100 { background-color: rgba(245, 158, 11, 0.22); }
+html.dark .border-amber-100 { border-color: rgba(245, 158, 11, 0.25); }
+html.dark .border-amber-200 { border-color: rgba(245, 158, 11, 0.4); }
+html.dark .text-amber-600, html.dark .text-amber-700 { color: #fbbf24; }
+html.dark .text-amber-900 { color: #fde68a; }
+
+/* Controles de formulario */
+html.dark input, html.dark select, html.dark textarea { color: #f9fafb; }
+html.dark ::placeholder { color: #6b7280; opacity: 1; }
+html.dark .shadow-sm, html.dark .shadow-lg { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); }
+
+/* Página pública: reglas propias de index.html */
+html.dark .nav-blur { background: rgba(11, 15, 25, 0.92); }
+html.dark .feature-icon { background: linear-gradient(135deg, rgba(34, 197, 94, 0.18), rgba(34, 197, 94, 0.28)); }
+html.dark .card-hover:hover { box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); }

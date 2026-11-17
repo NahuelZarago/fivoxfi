@@ -417,7 +417,7 @@ def test_register_ok_creates_user_and_logs_in(client, app):
 def test_login_error_is_inline_not_flash(client, shop):
     r = login(client, shop['owner'], password='mala')
     html = r.get_data(as_text=True)
-    assert r.status_code == 401 and 'Email o contraseña incorrectos.' in html and 'fixed top-4' not in html
+    assert r.status_code == 401 and 'Email o contraseña incorrectos.' in html and 'z-50 space-y-2' not in html
 
 
 # ── eliminar negocio ───────────────────────────────────────

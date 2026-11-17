@@ -2,6 +2,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+{# Tema claro/oscuro: se activa en toda la app y el login. La landing pública y los comprobantes lo desactivan con {% set themeable = false %}. #}
+{% if themeable is not defined or themeable %}
+<script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+{% endif %}
 {% if use_compiled_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
 {% else %}
@@ -12,4 +16,7 @@ tailwind.config = { theme: { extend: { colors: { green: {
   50:'#effaf2',100:'#d8f3df',200:'#b3e6c2',300:'#82d29d',400:'#4fb87a',
   500:'#2a9d5f',600:'#1e8049',700:'#1a663c',800:'#185133',900:'#14422b',950:'#0a2517' } } } } };
 </script>
+{% endif %}
+{% if themeable is not defined or themeable %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dark.css') }}">
 {% endif %}

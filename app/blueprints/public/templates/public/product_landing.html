@@ -1,7 +1,8 @@
+{% from '_macros.html' import theme_toggle %}
 <!DOCTYPE html>
 <html lang="es">
 <head><title>Fivox</title>{% include "_head.html" %}</head>
-<body class="bg-white"><div class="max-w-4xl mx-auto px-6 py-20 text-center">
+<body class="bg-white">{{ theme_toggle('floating') }}<div class="max-w-4xl mx-auto px-6 py-20 text-center">
 <h1 class="text-3xl font-bold mb-4">Sistema de Gestión</h1>
 <a href="{{ url_for('auth.register') }}" class="bg-green-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-green-700">Empezar gratis</a>
 </div></body></html>

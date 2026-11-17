@@ -1,4 +1,4 @@
-{% from '_macros.html' import icon %}
+{% from '_macros.html' import icon, theme_toggle %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -79,6 +79,7 @@
 
     <main class="flex-1 overflow-y-auto pt-14 lg:pt-0">
         <div class="p-4 sm:p-6 lg:p-8">
+            <div class="flex justify-end -mb-2 sm:mb-0">{{ theme_toggle('icon') }}</div>
             {% block content %}{% endblock %}
         </div>
     </main>
