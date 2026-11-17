@@ -27,6 +27,7 @@ def register_context(app):
             'use_compiled_css': app.config.get('USE_COMPILED_CSS'),
             'can': lambda cap: current_user.is_authenticated and current_user.can(cap),
             'nav_groups': [],
+            'google_enabled': bool(app.config.get('GOOGLE_CLIENT_ID') and app.config.get('GOOGLE_CLIENT_SECRET')),
         }
         if current_user.is_authenticated and getattr(current_user, 'has_role', False):
             badges = {}

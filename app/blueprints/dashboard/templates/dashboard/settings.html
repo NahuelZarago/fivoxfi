@@ -17,6 +17,7 @@
     <form method="POST" action="{{ url_for('dashboard.settings_update') }}" data-auth-form novalidate class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
         {{ csrf_input() }}<input type="hidden" name="action" value="password">
         <h2 class="font-bold">Cambiar contraseña</h2>
+        {% if current_user.google_sub %}<p class="text-xs text-gray-500 bg-gray-50 rounded-lg p-3">Entrás con Google, así que quizá no tengas una contraseña propia. Si querés una, usá <a class="underline text-green-700" href="{{ url_for('auth.forgot_password') }}">"Olvidé mi contraseña"</a> y elegí una nueva por email.</p>{% endif %}
         <div><label class="block text-sm font-medium mb-1.5" for="current_password">Contraseña actual</label>
             <input id="current_password" type="password" name="current_password" required autocomplete="current-password" data-label="La contraseña actual" data-toggle class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
             {{ field_error({}, 'current_password') }}</div>

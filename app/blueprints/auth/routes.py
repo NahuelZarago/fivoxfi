@@ -1,11 +1,15 @@
-from flask import current_app, flash, redirect, render_template, request, url_for
+import hmac
+
+from flask import current_app, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from . import auth_bp
 from ...extensions import db, limiter
 from ...models.user import User
+from ...services.google_oauth import login_or_create
 from ...services.tenants import create_tenant_for_owner, join_with_code
+from ...utils import google_auth as google
 from ...utils.csrf import rotate_csrf_token
 from ...utils.mailer import (
     RESET_MAX_AGE, SALT_RESET, SALT_VERIFY, VERIFY_MAX_AGE, read_token,
@@ -271,3 +275,55 @@ def reset_password(token):
         flash('Contraseña actualizada. Ya podés iniciar sesión.', 'success')
         return redirect(url_for('auth.login'))
     return render_template('auth/reset_password.html', token=token, errors={})
+
+
+# ─── INICIO DE SESIÓN CON GOOGLE ────────────────────────────
+def _google_redirect_uri():
+    return current_app.config.get('GOOGLE_REDIRECT_URI') or url_for('auth.google_callback', _external=True)
+
+
+@auth_bp.route('/google')
+@limiter.limit('30 per hour')
+def google_start():
+    if current_user.is_authenticated:
+        return _after_auth_redirect(current_user)
+    if not google.is_configured(current_app.config):
+        flash('El inicio de sesión con Google no está disponible.', 'warning')
+        return redirect(url_for('auth.login'))
+    state = google.new_state()
+    verifier, challenge = google.pkce_pair()
+    session['google_oauth'] = {'state': state, 'verifier': verifier}
+    return redirect(google.build_auth_url(current_app.config['GOOGLE_CLIENT_ID'], _google_redirect_uri(),
+                                          state, challenge))
+
+
+@auth_bp.route('/google/callback')
+@limiter.limit('30 per hour')
+def google_callback():
+    saved = session.pop('google_oauth', None)        # De un solo uso
+    if current_user.is_authenticated:
+        return _after_auth_redirect(current_user)
+    if request.args.get('error'):
+        flash('Cancelaste el inicio de sesión con Google.', 'info')
+        return redirect(url_for('auth.login'))
+    state, code = request.args.get('state', ''), request.args.get('code', '')
+    if (not google.is_configured(current_app.config) or not isinstance(saved, dict) or not code or not state
+            or not hmac.compare_digest(str(saved.get('state', '')), state)):
+        flash('La sesión con Google expiró o no es válida. Probá de nuevo.', 'danger')
+        return redirect(url_for('auth.login'))
+    try:
+        token = google.exchange_code(current_app.config['GOOGLE_CLIENT_ID'], current_app.config['GOOGLE_CLIENT_SECRET'],
+                                     code, _google_redirect_uri(), saved.get('verifier', ''))
+        profile = google.parse_profile(google.fetch_userinfo(token))
+        user, created = login_or_create(profile)
+    except google.GoogleAuthError as exc:
+        flash(str(exc), 'danger')
+        return redirect(url_for('auth.login'))
+
+    login_user(user)
+    rotate_csrf_token()
+    if created:
+        flash('¡Cuenta creada con Google! Ahora elegí cómo vas a usar Fivox.', 'success')
+    elif user.has_role and user.tenant_id:
+        flash(f'¡Hola, {user.username}!', 'success')
+    return _after_auth_redirect(user)

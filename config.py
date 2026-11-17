@@ -51,10 +51,15 @@ class Config:
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER') or os.environ.get('MAIL_USERNAME')
 
+    # ── Inicio de sesión con Google (opcional: sin estas dos variables el botón no aparece) ──
+    GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID') or None
+    GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET') or None
+    GOOGLE_REDIRECT_URI = os.environ.get('GOOGLE_REDIRECT_URI') or None   # si vacío: /auth/google/callback del sitio
+
     # ── Negocio ────────────────────────────────────────────
     # Límite de empleados activos por plan (None = sin límite).
     PLAN_EMPLOYEE_LIMITS = {'basic': 3, 'pro': None}
-    SUPPORT_WHATSAPP = os.environ.get('SUPPORT_WHATSAPP', '5493435617089')  # Reemplazar por el real
+    SUPPORT_WHATSAPP = os.environ.get('SUPPORT_WHATSAPP', '5491100000000')  # Reemplazar por el real
     # True cuando se compila Tailwind (ver README) y se sirve /static/css/app.css
     USE_COMPILED_CSS = _env_bool('USE_COMPILED_CSS', False)
 
@@ -81,6 +86,10 @@ class TestingConfig(Config):
     SQLALCHEMY_ENGINE_OPTIONS = {}
     CSRF_ENABLED = False             # Un test dedicado la activa
     RATELIMIT_ENABLED = False
+    # Los tests nunca usan las credenciales reales de tu .env (cada test que las necesita las pone a mano).
+    GOOGLE_CLIENT_ID = None
+    GOOGLE_CLIENT_SECRET = None
+    GOOGLE_REDIRECT_URI = None
     MAIL_USERNAME = 'tests@fivox.local'  # Con TESTING, Flask-Mail no envía nada
     MAIL_DEFAULT_SENDER = 'tests@fivox.local'
     WTF_CSRF_ENABLED = False

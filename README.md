@@ -54,6 +54,14 @@ La migración `005` (columna `is_superadmin` y tabla `price_changes`) se aplica 
 - **Lector de códigos de barras** en el punto de venta: el cursor queda siempre en el buscador; al escanear (el lector escribe el código y manda Enter) el producto con ese SKU exacto se agrega solo al carrito. Escanear de nuevo suma una unidad. Si el código no existe o no hay stock, avisa en pantalla.
 - Funciona con cualquier lector USB/Bluetooth que actúe como teclado. En el producto, cargá el código de barras en el campo *Código de barras / SKU*.
 
+## Inicio de sesión con Google
+Botón "Continuar con Google" en el login y en el registro. Solo aparece si configurás las credenciales:
+1. En <https://console.cloud.google.com> creá un proyecto → *APIs y servicios* → *Pantalla de consentimiento de OAuth* (tipo *Externo*; nombre de la app y tu email). Mientras esté en modo *Prueba*, agregá como *usuarios de prueba* los Gmail que van a entrar (o publicá la app).
+2. *Credenciales* → *Crear credenciales* → *ID de cliente de OAuth* → tipo *Aplicación web*. En *URI de redireccionamiento autorizados* poné exactamente `http://localhost:8000/auth/google/callback` (y, en producción, `https://TU-DOMINIO/auth/google/callback`).
+3. Copiá el *ID de cliente* y el *Secreto* a tu `.env` (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`) y reiniciá: `docker compose up -d --force-recreate web`.
+
+Seguridad: flujo *authorization code* con PKCE y `state` de un solo uso; se exige email verificado por Google; si la cuenta existía sin verificar, se anula su contraseña al vincularla (evita que alguien que se registró antes con tu email conserve acceso). Las cuentas creadas con Google no tienen contraseña hasta que usen "Olvidé mi contraseña". Migración `008` (columna `users.google_sub`).
+
 ## Tests
 ```bash
 python tests/static_checks.py   # plantillas, endpoints, imports, CSRF en formularios
@@ -76,6 +84,5 @@ Sugerido: correr `pytest` con `TEST_DATABASE_URL` apuntando a un Postgres para v
 
 ## Pendiente (a propósito, para el final)
 - **Mercado Pago / tarjeta**: cobro de suscripción y/o ventas. Ya está preparado el terreno: `@csrf_exempt` para webhooks firmados y el medio de pago `mercadopago` en `services/sales.py`.
-- **Inicio de sesión con Google** (OAuth): hay un comentario en `auth/login.html` donde va el botón.
 - Módulo **Turnos y Recordatorios** (hoy en mantenimiento, `app/blueprints/appointments`).
 - Ideas: numeración de ventas por negocio, CSP estricta, 2FA para dueños.

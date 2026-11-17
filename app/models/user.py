@@ -21,6 +21,8 @@ class User(UserMixin, db.Model):
     # Se incrementa al cambiar la contraseña: invalida sesiones y cookies "recordarme" viejas.
     # Administrador de la plataforma (vos). Solo se asigna por comando: flask --app run make-admin EMAIL
     is_superadmin = db.Column(db.Boolean, default=False, nullable=False, server_default=db.false())
+    # Identificador estable de la cuenta de Google (claim 'sub'); NULL si nunca entró con Google.
+    google_sub = db.Column(db.String(64), unique=True, nullable=True)
     auth_version = db.Column(db.Integer, default=0, nullable=False, server_default='0')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 

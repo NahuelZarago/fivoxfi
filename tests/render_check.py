@@ -85,6 +85,7 @@ cash_sum = {'methods': [{'method': 'cash', 'total': Decimal('3000'), 'count': 3}
 cases = [
     ('public/index.html', {}, 'owner'), ('public/contact.html', {}, 'owner'), ('public/product_landing.html', {'slug': 's'}, 'owner'),
     ('auth/login.html', {'email': 'a@b.com', 'error': None}, 'owner'), ('auth/login.html', {'email': 'a@b.com', 'error': 'Email o contraseña incorrectos.'}, 'owner'), ('auth/register.html', {'form': {'username': 'x', 'email': 'y'}, 'errors': {}}, 'owner'), ('auth/register.html', {'form': {'username': '', 'email': 'y'}, 'errors': {'username': 'El nombre es obligatorio.', 'email': 'Email inválido', 'password': 'x', 'confirm_password': 'y'}}, 'owner'),
+    ('auth/login.html', {'email': '', 'error': None, 'google_enabled': True}, 'owner'), ('auth/register.html', {'form': {}, 'errors': {}, 'google_enabled': True}, 'owner'),
     ('auth/choose_role.html', {}, 'owner'), ('auth/join.html', {}, 'owner'), ('auth/setup_owner.html', {}, 'owner'),
     ('auth/pending_verification.html', {}, 'owner'), ('auth/forgot_password.html', {}, 'owner'), ('auth/reset_password.html', {'token': 't', 'errors': {}}, 'owner'), ('auth/reset_password.html', {'token': 't', 'errors': {'password': 'corta'}}, 'owner'),
     ('email/verify.html', {'username': 'Ana', 'url': 'http://x/y'}, 'owner'), ('email/reset.html', {'username': 'Ana', 'url': 'http://x/y'}, 'owner'),
@@ -138,6 +139,10 @@ with app.test_request_context('/'):
             assert html.strip(), 'vacío'
             for bad in ('<img src=x onerror', '<script>alert', 'Ana <script>', '<b>Pepe'):
                 assert bad not in html.replace('type="application/json"', ''), f'XSS sin escapar: {bad}'
+            if data.get('google_enabled'):
+                assert 'auth/google_start' in html, 'falta el botón de Google'
+            elif tpl.startswith('auth/') and 'google_enabled' not in data:
+                assert 'auth/google_start' not in html, 'el botón de Google no debería aparecer'
             if tpl == 'pos/terminal.html':
                 assert '</script><b>' not in html, 'tojson no escapó </script>'
         except Exception as e:  # noqa: BLE001

@@ -278,3 +278,44 @@ def test_csv_format_and_injection():
     assert text[0] == 'Nombre;Precio'
     assert text[1] == "'=SUM(A1);1234,50"
     assert text[2] == 'Té;2,00'
+
+
+# ── Google OAuth (partes puras) ───────────────────────────
+def test_pkce_pair_is_valid_s256():
+    import base64, hashlib
+    from app.utils import google_auth as google_oauth
+    verifier, challenge = google_oauth.pkce_pair()
+    assert 43 <= len(verifier) <= 128
+    expected = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b'=').decode()
+    assert challenge == expected and '=' not in challenge
+    assert google_oauth.pkce_pair()[0] != verifier and google_oauth.new_state() != google_oauth.new_state()
+
+
+def test_google_auth_url():
+    from urllib.parse import parse_qs, urlparse
+    from app.utils import google_auth as google_oauth
+    url = google_oauth.build_auth_url('cid', 'https://x.com/auth/google/callback', 'st', 'chal')
+    q = parse_qs(urlparse(url).query)
+    assert url.startswith('https://accounts.google.com/')
+    assert q['client_id'] == ['cid'] and q['state'] == ['st'] and q['code_challenge'] == ['chal']
+    assert q['code_challenge_method'] == ['S256'] and q['response_type'] == ['code']
+    assert q['redirect_uri'] == ['https://x.com/auth/google/callback'] and 'email' in q['scope'][0]
+
+
+def test_google_parse_profile():
+    from app.utils.google_auth import GoogleAuthError, parse_profile
+    ok = parse_profile({'sub': '123', 'email': ' Ana@Gmail.COM ', 'email_verified': True, 'name': '  Ana   Pérez '})
+    assert ok == {'sub': '123', 'email': 'ana@gmail.com', 'name': 'Ana Pérez'}
+    assert parse_profile({'sub': '1', 'email': 'luis@x.com', 'email_verified': 'true'})['name'] == 'luis'
+    for bad in ({'sub': '1', 'email': 'a@b.com', 'email_verified': False}, {'sub': '1', 'email': 'a@b.com'},
+                {'sub': '', 'email': 'a@b.com', 'email_verified': True}, {'sub': '1', 'email': 'sin-arroba', 'email_verified': True},
+                {'sub': 1, 'email': 'a@b.com', 'email_verified': True}, {'sub': 'x' * 65, 'email': 'a@b.com', 'email_verified': True},
+                {'sub': '1', 'email': 'a' * 120 + '@b.com', 'email_verified': True}):
+        with pytest.raises(GoogleAuthError):
+            parse_profile(bad)
+
+
+def test_google_is_configured():
+    from app.utils.google_auth import is_configured
+    assert is_configured({'GOOGLE_CLIENT_ID': 'a', 'GOOGLE_CLIENT_SECRET': 'b'})
+    assert not is_configured({'GOOGLE_CLIENT_ID': 'a'}) and not is_configured({})
