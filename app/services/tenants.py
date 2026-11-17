@@ -90,6 +90,7 @@ def delete_tenant(tenant):
     """
     from ..models.product import Product
     from ..models.cash_session import CashSession
+    from ..models.catalog import Category, Supplier
     from ..models.price_change import PriceChange
     from ..models.sale import Sale, SaleItem
     from ..models.stock_movement import StockMovement
@@ -103,6 +104,8 @@ def delete_tenant(tenant):
         SaleItem.query.filter(SaleItem.sale_id.in_(sale_ids)).delete(synchronize_session=False)
         Sale.query.filter_by(tenant_id=tid).delete(synchronize_session=False)
         Product.query.filter_by(tenant_id=tid).delete(synchronize_session=False)
+        Category.query.filter_by(tenant_id=tid).delete(synchronize_session=False)
+        Supplier.query.filter_by(tenant_id=tid).delete(synchronize_session=False)
         # auth_version + 1 cierra las sesiones abiertas de todo el equipo
         User.query.filter_by(tenant_id=tid).update(
             {User.tenant_id: None, User.role: None, User.auth_version: User.auth_version + 1},

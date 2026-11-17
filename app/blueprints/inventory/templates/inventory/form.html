@@ -20,6 +20,22 @@
                 <input id="sale_price" name="sale_price" inputmode="decimal" required value="{{ val('sale_price', product.sale_price if product else '') }}" placeholder="0,00" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"></div>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div><label class="block text-sm font-medium mb-1.5" for="category_id">Categoría</label>
+                <select id="category_id" name="category_id" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50">
+                    <option value="">Sin categoría</option>
+                    {% set cur_cat = val('category_id', product.category_id if product else '')|trim %}
+                    {% for c in categories %}<option value="{{ c.id }}" {{ 'selected' if cur_cat == c.id|string }}>{{ c.name }}</option>{% endfor %}
+                </select>
+                {% if not categories %}<p class="text-xs text-gray-400 mt-1"><a class="underline" href="{{ url_for('catalog.categories') }}">Creá categorías</a> para agrupar productos.</p>{% endif %}</div>
+            <div><label class="block text-sm font-medium mb-1.5" for="supplier_id">Proveedor</label>
+                <select id="supplier_id" name="supplier_id" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50">
+                    <option value="">Sin proveedor</option>
+                    {% set cur_sup = val('supplier_id', product.supplier_id if product else '')|trim %}
+                    {% for s in suppliers %}<option value="{{ s.id }}" {{ 'selected' if cur_sup == s.id|string }}>{{ s.name }}</option>{% endfor %}
+                </select>
+                {% if not suppliers %}<p class="text-xs text-gray-400 mt-1"><a class="underline" href="{{ url_for('catalog.suppliers') }}">Cargá proveedores</a> para anotar a quién comprás.</p>{% endif %}</div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {% if not product %}
             <div><label class="block text-sm font-medium mb-1.5" for="stock">Stock inicial</label>
                 <input id="stock" name="stock" type="number" min="0" value="{{ val('stock', 0) }}" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"></div>

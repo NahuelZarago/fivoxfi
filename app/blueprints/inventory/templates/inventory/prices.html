@@ -38,6 +38,12 @@
     <fieldset>
         <legend class="block text-sm font-medium mb-2">¿A qué productos?</legend>
         <label class="flex items-center gap-2 mb-2 text-sm"><input type="radio" name="scope" value="all" {{ 'checked' if form.get('scope', 'all') == 'all' }} class="text-green-600"> A todos los productos activos</label>
+        {% if categories %}
+        <label class="flex items-center gap-2 mb-2 text-sm"><input type="radio" name="scope" value="category" {{ 'checked' if form.get('scope') == 'category' }} class="text-green-600"> Solo a una categoría:
+            <select name="category_id" aria-label="Categoría" class="border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-gray-50">
+                {% for c in categories %}<option value="{{ c.id }}" {{ 'selected' if form.get('category_id') == c.id|string }}>{{ c.name }}</option>{% endfor %}
+            </select></label>
+        {% endif %}
         <label class="flex items-center gap-2 text-sm"><input type="radio" name="scope" value="search" {{ 'checked' if form.get('scope') == 'search' }} class="text-green-600"> Solo a los que contengan este texto en el nombre o SKU:</label>
         <input name="search" maxlength="100" value="{{ form.get('search', '') }}" placeholder="Ej: yerba" aria-label="Texto a buscar" class="mt-2 w-full sm:w-72 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
     </fieldset>

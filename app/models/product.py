@@ -18,11 +18,22 @@ class Product(db.Model):
     stock = db.Column(db.Integer, nullable=False, default=0)
     low_stock_threshold = db.Column(db.Integer, nullable=False, default=DEFAULT_LOW_STOCK_THRESHOLD,
                                     server_default=str(DEFAULT_LOW_STOCK_THRESHOLD))
+    category_id = db.Column(db.Integer, nullable=True, index=True)
+    supplier_id = db.Column(db.Integer, nullable=True, index=True)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    # Solo lectura (se cargan con selectinload donde se muestran; un JOIN rompería los FOR UPDATE):
+    #  category_id / supplier_id se asignan a mano (la FK compuesta incluye tenant_id).
+    category = db.relationship('Category', viewonly=True)
+    supplier = db.relationship('Supplier', viewonly=True)
+
     __table_args__ = (
+        db.ForeignKeyConstraint(['tenant_id', 'category_id'], ['categories.tenant_id', 'categories.id'],
+                                name='fk_products_tenant_category'),
+        db.ForeignKeyConstraint(['tenant_id', 'supplier_id'], ['suppliers.tenant_id', 'suppliers.id'],
+                                name='fk_products_tenant_supplier'),
         db.UniqueConstraint('tenant_id', 'sku', name='uq_sku_per_tenant'),
         # Necesario para la FK compuesta de stock_movements (aislamiento por tenant en la base).
         db.UniqueConstraint('tenant_id', 'id', name='uq_products_tenant_id_id'),

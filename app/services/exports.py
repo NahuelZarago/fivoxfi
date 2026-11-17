@@ -1,5 +1,5 @@
 """Datasets exportables. Cada uno devuelve (nombre de archivo base, columnas, filas)."""
-from sqlalchemy import func
+from sqlalchemy.orm import selectinload
 
 from ..extensions import db
 from ..models.product import Product
@@ -18,17 +18,20 @@ def _local(dt):
 
 
 def products_dataset(tenant_id, include_costs):
-    cols = [('Nombre', TEXT, 34), ('SKU', TEXT, 16), ('Stock', INT, 9), ('Stock mínimo', INT, 13),
-            ('Precio de venta', MONEY, 16)]
+    cols = [('Nombre', TEXT, 34), ('SKU', TEXT, 16), ('Categoría', TEXT, 20), ('Proveedor', TEXT, 24),
+            ('Stock', INT, 9), ('Stock mínimo', INT, 13), ('Precio de venta', MONEY, 16)]
     if include_costs:
-        cols[4:4] = [('Precio de compra', MONEY, 16)]
+        cols[6:6] = [('Precio de compra', MONEY, 16)]
         cols.append(('Margen unitario', MONEY, 16))
         cols.append(('Valor en stock (costo)', MONEY, 22))
     cols.append(('Activo', TEXT, 9))
     rows = []
-    q = Product.query.filter_by(tenant_id=tenant_id).order_by(Product.name).limit(MAX_EXPORT_ROWS)
+    q = (Product.query.filter_by(tenant_id=tenant_id)
+         .options(selectinload(Product.category), selectinload(Product.supplier))
+         .order_by(Product.name).limit(MAX_EXPORT_ROWS))
     for p in q:
-        row = [p.name, p.sku or '', p.stock, p.low_stock_threshold]
+        row = [p.name, p.sku or '', p.category.name if p.category else '',
+               p.supplier.name if p.supplier else '', p.stock, p.low_stock_threshold]
         if include_costs:
             row += [p.cost_price, p.sale_price, p.sale_price - p.cost_price, p.cost_price * p.stock]
         else:

@@ -3,12 +3,15 @@ import re
 from flask import flash, redirect, render_template, request, url_for
 from flask_login import current_user
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import selectinload
 
 from . import inventory_bp
 from ...extensions import db
 from ...models.product import DEFAULT_LOW_STOCK_THRESHOLD, Product
 from ...models.stock_movement import REASON_INITIAL, REASON_LABELS, StockMovement
 from ...services import pricing
+from ...services.catalog import resolve_ref
+from ...models.catalog import Category, Supplier
 from ...services.inventory import apply_movement, lock_products, register_manual_movement
 from ...utils.decorators import login_required_with_tenant, require
 from ...utils.permissions import (
@@ -35,8 +38,16 @@ def _product_form_data(form):
         'sale_price': parse_money(form.get('sale_price', ''), 'Precio de venta'),
         'low_stock_threshold': parse_int(form.get('low_stock_threshold', DEFAULT_LOW_STOCK_THRESHOLD),
                                          'Alerta de stock bajo', minimum=0, maximum=100000),
+        'category_id': resolve_ref(Category, current_user.tenant_id, form.get('category_id'), 'La categoría'),
+        'supplier_id': resolve_ref(Supplier, current_user.tenant_id, form.get('supplier_id'), 'El proveedor'),
     }
     return data
+
+
+def _catalog_lists():
+    tid = current_user.tenant_id
+    return {'categories': Category.query.filter_by(tenant_id=tid).order_by(db.func.lower(Category.name)).all(),
+            'suppliers': Supplier.query.filter_by(tenant_id=tid).order_by(db.func.lower(Supplier.name)).all()}
 
 
 @inventory_bp.route('/productos')
@@ -55,9 +66,24 @@ def product_list():
     if q:
         like = f'%{escape_like(q)}%'
         query = query.filter(db.or_(Product.name.ilike(like, escape='\\'), Product.sku.ilike(like, escape='\\')))
+    category = request.args.get('category', type=int)
+    # Los proveedores son información de compras: solo la ve quien ve costos (como los precios de compra).
+    sees_purchasing = current_user.can(REPORTS_VIEW)
+    supplier = request.args.get('supplier', type=int) if sees_purchasing else None
+    if category == 0:
+        query = query.filter(Product.category_id.is_(None))          # "Sin categoría"
+    elif category:
+        query = query.filter(Product.category_id == category)
+    if supplier:
+        query = query.filter(Product.supplier_id == supplier)
     page = request.args.get('page', 1, type=int)
-    products = query.order_by(Product.name).paginate(page=page, per_page=PER_PAGE, error_out=False)
-    return render_template('inventory/list.html', products=products, q=q, flt=flt)
+    products = (query.options(selectinload(Product.category), selectinload(Product.supplier))
+                .order_by(Product.name).paginate(page=page, per_page=PER_PAGE, error_out=False))
+    lists = _catalog_lists()
+    if not sees_purchasing:
+        lists['suppliers'] = []
+    return render_template('inventory/list.html', products=products, q=q, flt=flt,
+                           category=category, supplier=supplier, **lists)
 
 
 @inventory_bp.route('/productos/nuevo', methods=['GET', 'POST'])
@@ -84,8 +110,8 @@ def product_create():
         except IntegrityError:
             db.session.rollback()
             flash('Ya existe un producto con ese SKU.', 'danger')
-        return render_template('inventory/form.html', product=None, form=request.form), 400
-    return render_template('inventory/form.html', product=None, form={})
+        return render_template('inventory/form.html', product=None, form=request.form, **_catalog_lists()), 400
+    return render_template('inventory/form.html', product=None, form={}, **_catalog_lists())
 
 
 @inventory_bp.route('/productos/<int:product_id>/editar', methods=['GET', 'POST'])
@@ -106,8 +132,8 @@ def product_edit(product_id):
         except IntegrityError:
             db.session.rollback()
             flash('Ya existe otro producto con ese SKU.', 'danger')
-        return render_template('inventory/form.html', product=product, form=request.form), 400
-    return render_template('inventory/form.html', product=product, form={})
+        return render_template('inventory/form.html', product=product, form=request.form, **_catalog_lists()), 400
+    return render_template('inventory/form.html', product=product, form={}, **_catalog_lists())
 
 
 @inventory_bp.route('/productos/<int:product_id>/eliminar', methods=['POST'])
@@ -205,17 +231,32 @@ def _price_form(form):
     scope = form.get('scope', 'all')
     if scope == 'search' and not search:
         raise ValidationFailure('Escribí qué productos querés actualizar (por ejemplo "yerba").')
+    if scope not in ('all', 'search', 'category'):
+        scope = 'all'
+    category_id, category_name = None, ''
+    if scope == 'category':
+        category_id = resolve_ref(Category, current_user.tenant_id, form.get('category_id'), 'La categoría')
+        if category_id is None:
+            raise ValidationFailure('Elegí una categoría.')
+        category_name = db.session.get(Category, category_id).name
     if scope != 'search':
         search = ''
-    return {'percent': percent, 'applies_to': applies_to, 'rounding': rounding, 'search': search, 'scope': scope}
+    return {'percent': percent, 'applies_to': applies_to, 'rounding': rounding, 'search': search, 'scope': scope,
+            'category_id': category_id, 'category_name': category_name}
 
 
 @inventory_bp.route('/precios')
 @login_required_with_tenant
 @require(INVENTORY_MANAGE)
 def price_update():
-    return render_template('inventory/prices.html', form={}, applies=APPLIES_TO, roundings=ROUNDING_OPTIONS,
-                           batches=pricing.list_batches(current_user.tenant_id))
+    return _prices_page({})
+
+
+def _prices_page(form, status=200):
+    page = render_template('inventory/prices.html', form=form, applies=APPLIES_TO, roundings=ROUNDING_OPTIONS,
+                           batches=pricing.list_batches(current_user.tenant_id),
+                           categories=_catalog_lists()['categories'])
+    return page, status
 
 
 @inventory_bp.route('/precios/vista-previa', methods=['POST'])
@@ -225,14 +266,12 @@ def price_preview():
     try:
         data = _price_form(request.form)
         rows, unchanged = pricing.build_preview(current_user.tenant_id, data['percent'], data['applies_to'],
-                                                data['rounding'], data['search'])
+                                                data['rounding'], data['search'], data['category_id'])
         if not rows:
             raise ValidationFailure('Ningún producto cambiaría de precio con esos valores.')
     except ValidationFailure as exc:
         flash(str(exc), 'danger')
-        return render_template('inventory/prices.html', form=request.form, applies=APPLIES_TO,
-                               roundings=ROUNDING_OPTIONS,
-                               batches=pricing.list_batches(current_user.tenant_id)), 400
+        return _prices_page(request.form, 400)
     return render_template('inventory/prices_preview.html', rows=rows[:100], total=len(rows), unchanged=unchanged,
                            data=data, applies=APPLIES_TO, roundings=ROUNDING_OPTIONS)
 
@@ -244,7 +283,7 @@ def price_apply():
     try:
         data = _price_form(request.form)
         _, count = pricing.apply_update(current_user.tenant_id, current_user.id, data['percent'],
-                                        data['applies_to'], data['rounding'], data['search'])
+                                        data['applies_to'], data['rounding'], data['search'], data['category_id'])
     except ValidationFailure as exc:
         flash(str(exc), 'danger')
         return redirect(url_for('inventory.price_update'))

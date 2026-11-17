@@ -43,6 +43,13 @@ La migración `005` (columna `is_superadmin` y tabla `price_changes`) se aplica 
 - **Tickets**: tras cada venta, "Ver / imprimir ticket" (formato 80 mm, comprobante no fiscal). También desde el historial de ventas. Cada empleado ve solo sus tickets.
 - Migración `006` (tabla `cash_sessions`), se aplica sola con `db upgrade`.
 
+## Novedades v6
+- **Categorías** y **proveedores** (menú *Categorías* / *Proveedores*, solo dueño): se asignan al crear o editar un producto.
+- El inventario se filtra por categoría (incluye "Sin categoría") y por proveedor; los empleados no ven proveedores (es información de compras).
+- *Actualizar precios* puede aplicarse a una categoría completa.
+- La exportación de productos incluye categoría y proveedor.
+- Migración `007` (tablas `categories` y `suppliers`, columnas en `products`). Borrar una categoría o proveedor no borra productos.
+
 ## Tests
 ```bash
 python tests/static_checks.py   # plantillas, endpoints, imports, CSRF en formularios

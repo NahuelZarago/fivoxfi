@@ -21,6 +21,19 @@
         <option value="low" {{ 'selected' if flt == 'low' }}>Stock bajo</option>
         {% if can('inventory.manage') %}<option value="inactive" {{ 'selected' if flt == 'inactive' }}>Desactivados</option>{% endif %}
     </select>
+    {% if categories %}
+    <select name="category" aria-label="Categoría" class="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white">
+        <option value="">Todas las categorías</option>
+        <option value="0" {{ 'selected' if category == 0 }}>Sin categoría</option>
+        {% for c in categories %}<option value="{{ c.id }}" {{ 'selected' if category == c.id }}>{{ c.name }}</option>{% endfor %}
+    </select>
+    {% endif %}
+    {% if suppliers %}
+    <select name="supplier" aria-label="Proveedor" class="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white">
+        <option value="">Todos los proveedores</option>
+        {% for s in suppliers %}<option value="{{ s.id }}" {{ 'selected' if supplier == s.id }}>{{ s.name }}</option>{% endfor %}
+    </select>
+    {% endif %}
     <button class="bg-gray-900 text-white px-4 py-2 rounded-xl text-sm font-semibold">Filtrar</button>
 </form>
 
@@ -30,6 +43,7 @@
             <tr>
                 <th class="text-left px-4 py-3">Producto</th>
                 <th class="text-left px-4 py-3">SKU</th>
+                <th class="text-left px-4 py-3">Categoría</th>
                 {% if sees_cost %}<th class="text-right px-4 py-3">Costo</th>{% endif %}
                 <th class="text-right px-4 py-3">Venta</th>
                 {% if sees_cost %}<th class="text-right px-4 py-3">Margen</th>{% endif %}
@@ -40,8 +54,9 @@
         <tbody class="divide-y divide-gray-100">
             {% for p in products.items %}
             <tr class="hover:bg-gray-50">
-                <td class="px-4 py-3 font-medium">{{ p.name }}</td>
+                <td class="px-4 py-3 font-medium">{{ p.name }}{% if sees_cost and p.supplier %}<p class="text-xs font-normal text-gray-400">{{ p.supplier.name }}</p>{% endif %}</td>
                 <td class="px-4 py-3 text-gray-500 font-mono text-xs">{{ p.sku or '—' }}</td>
+                <td class="px-4 py-3 text-gray-600">{{ p.category.name if p.category else '—' }}</td>
                 {% if sees_cost %}<td class="px-4 py-3 text-right text-gray-600">{{ p.cost_price|money }}</td>{% endif %}
                 <td class="px-4 py-3 text-right font-semibold">{{ p.sale_price|money }}</td>
                 {% if sees_cost %}<td class="px-4 py-3 text-right text-green-700">{{ p.unit_margin|money }}</td>{% endif %}
@@ -63,10 +78,10 @@
                 </td>
             </tr>
             {% else %}
-            <tr><td colspan="7" class="px-4 py-10 text-center text-gray-400">No hay productos para mostrar.</td></tr>
+            <tr><td colspan="8" class="px-4 py-10 text-center text-gray-400">No hay productos para mostrar.</td></tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
-{{ pagination(products, 'inventory.product_list', q=q, filter=flt) }}
+{{ pagination(products, 'inventory.product_list', q=q, filter=flt, category=category, supplier=supplier) }}
 {% endblock %}

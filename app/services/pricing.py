@@ -13,8 +13,10 @@ from ..utils.validation import ValidationFailure
 MAX_PRODUCTS_PER_UPDATE = 5000
 
 
-def _scoped_query(tenant_id, search):
+def _scoped_query(tenant_id, search, category_id=None):
     q = Product.query.filter(Product.tenant_id == tenant_id, Product.is_active.is_(True))
+    if category_id:
+        q = q.filter(Product.category_id == category_id)
     if search:
         like = f'%{escape_like(search)}%'
         q = q.filter(db.or_(Product.name.ilike(like, escape='\\'), Product.sku.ilike(like, escape='\\')))
@@ -35,10 +37,10 @@ def _new_prices(product, percent, applies_to, step):
     return cost, sale
 
 
-def build_preview(tenant_id, percent, applies_to, rounding, search=None):
+def build_preview(tenant_id, percent, applies_to, rounding, search=None, category_id=None):
     """Calcula (sin guardar) cómo quedarían los precios. Devuelve (filas, total_afectados, sin_cambio)."""
     step = _validate_options(applies_to, rounding)
-    products = _scoped_query(tenant_id, search).order_by(Product.name).limit(MAX_PRODUCTS_PER_UPDATE + 1).all()
+    products = _scoped_query(tenant_id, search, category_id).order_by(Product.name).limit(MAX_PRODUCTS_PER_UPDATE + 1).all()
     if len(products) > MAX_PRODUCTS_PER_UPDATE:
         raise ValidationFailure(f'Son más de {MAX_PRODUCTS_PER_UPDATE} productos: acotá con una búsqueda.')
     rows, unchanged = [], 0
@@ -52,14 +54,14 @@ def build_preview(tenant_id, percent, applies_to, rounding, search=None):
     return rows, unchanged
 
 
-def apply_update(tenant_id, user_id, percent, applies_to, rounding, search=None):
+def apply_update(tenant_id, user_id, percent, applies_to, rounding, search=None, category_id=None):
     """
     Aplica el cambio. Vuelve a calcular todo con los precios ACTUALES (bloqueando las filas),
     así lo que se guarda nunca depende de lo que mostró la vista previa. Devuelve (batch_id, cantidad).
     """
     step = _validate_options(applies_to, rounding)
     try:
-        ids = [r[0] for r in _scoped_query(tenant_id, search).with_entities(Product.id).limit(MAX_PRODUCTS_PER_UPDATE + 1).all()]
+        ids = [r[0] for r in _scoped_query(tenant_id, search, category_id).with_entities(Product.id).limit(MAX_PRODUCTS_PER_UPDATE + 1).all()]
         if len(ids) > MAX_PRODUCTS_PER_UPDATE:
             raise ValidationFailure(f'Son más de {MAX_PRODUCTS_PER_UPDATE} productos: acotá con una búsqueda.')
         products = (Product.query.filter(Product.tenant_id == tenant_id, Product.id.in_(sorted(ids)))
