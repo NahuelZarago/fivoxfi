@@ -15,7 +15,7 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div class="lg:col-span-2 space-y-4">
         <div class="bg-white rounded-2xl border border-gray-200 p-4">
-            <input type="search" id="searchInput" placeholder="Buscar por nombre o SKU..." autocomplete="off" aria-label="Buscar producto"
+            <input type="search" id="searchInput" placeholder="Buscar por nombre o SKU, o escaneá un código de barras..." autofocus autocomplete="off" aria-label="Buscar producto"
                    class="w-full border border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-500">
             <div id="searchResults" class="mt-2 hidden border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100"></div>
         </div>
@@ -224,6 +224,31 @@
             } catch (e) { /* sin acción */ }
         }, 200);
     });
+
+    // Lector de código de barras: escribe el código y manda Enter. Si coincide EXACTO con un SKU, se agrega solo.
+    var searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('keydown', async function (e) {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        var code = this.value.trim();
+        if (!code) return;
+        clearTimeout(timer); searchSeq++;
+        document.getElementById('searchResults').classList.add('hidden');
+        try {
+            var res = await fetch('/app/pos/api/products/by-code?code=' + encodeURIComponent(code));
+            var data = await res.json().catch(function () { return {}; });
+            if (res.ok && data.id) {
+                addToCart(data);
+                this.value = '';
+            } else {
+                showError(data.error || 'No se pudo buscar el código.');
+                this.select();
+            }
+        } catch (err) {
+            showError('Error de conexión al buscar el código.');
+        }
+    });
+    searchInput.focus();
 
     document.getElementById('checkoutBtn').addEventListener('click', checkout);
     document.getElementById('clearBtn').addEventListener('click', clearCart);

@@ -50,6 +50,10 @@ La migración `005` (columna `is_superadmin` y tabla `price_changes`) se aplica 
 - La exportación de productos incluye categoría y proveedor.
 - Migración `007` (tablas `categories` y `suppliers`, columnas en `products`). Borrar una categoría o proveedor no borra productos.
 
+## Novedades v7
+- **Lector de códigos de barras** en el punto de venta: el cursor queda siempre en el buscador; al escanear (el lector escribe el código y manda Enter) el producto con ese SKU exacto se agrega solo al carrito. Escanear de nuevo suma una unidad. Si el código no existe o no hay stock, avisa en pantalla.
+- Funciona con cualquier lector USB/Bluetooth que actúe como teclado. En el producto, cargá el código de barras en el campo *Código de barras / SKU*.
+
 ## Tests
 ```bash
 python tests/static_checks.py   # plantillas, endpoints, imports, CSRF en formularios

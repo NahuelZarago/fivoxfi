@@ -248,3 +248,39 @@ def test_selling_still_works_with_categories(client, shop):
     login(client, shop['employee'])
     r = client.post('/app/pos/api/sale', json={'payment_method': 'cash', 'items': [{'product_id': p.id, 'quantity': 2}]})
     assert r.status_code == 200 and fresh(Product, p.id).stock == 3
+
+
+# ── código de barras en el POS ─────────────────────────────
+def test_pos_lookup_by_exact_code(client, shop):
+    make_product(shop['tenant'], 'Coca', sku='7790895000010', stock=4)
+    login(client, shop['employee'])
+    r = client.get('/app/pos/api/products/by-code?code=7790895000010')
+    assert r.status_code == 200 and r.get_json()['name'] == 'Coca' and r.get_json()['stock'] == 4
+    assert client.get('/app/pos/api/products/by-code?code=%207790895000010%20').status_code == 200   # espacios
+    assert client.get('/app/pos/api/products/by-code?code=779089500001').status_code == 404         # parcial: no coincide
+    assert client.get('/app/pos/api/products/by-code?code=').status_code == 400
+
+
+def test_pos_lookup_is_case_insensitive(client, shop):
+    make_product(shop['tenant'], 'Pan', sku='AbC-1')
+    login(client, shop['employee'])
+    assert client.get('/app/pos/api/products/by-code?code=abc-1').status_code == 200
+
+
+def test_pos_lookup_rejects_inactive_out_of_stock_and_other_tenant(client, shop):
+    other = make_tenant('Otro')
+    make_product(other, 'Ajeno', sku='AJENO-1')
+    make_product(shop['tenant'], 'Viejo', sku='OFF-1', is_active=False)
+    make_product(shop['tenant'], 'Agotado', sku='ZERO-1', stock=0)
+    login(client, shop['employee'])
+    assert client.get('/app/pos/api/products/by-code?code=AJENO-1').status_code == 404
+    assert client.get('/app/pos/api/products/by-code?code=OFF-1').status_code == 404
+    r = client.get('/app/pos/api/products/by-code?code=ZERO-1')
+    assert r.status_code == 409 and 'no tiene stock' in r.get_json()['error']
+
+
+def test_pos_lookup_requires_pos_permission(client, shop):
+    make_product(shop['tenant'], 'Coca', sku='C1')
+    assert client.get('/app/pos/api/products/by-code?code=C1').status_code == 401
+    login(client, shop['client'])
+    assert client.get('/app/pos/api/products/by-code?code=C1').status_code == 403

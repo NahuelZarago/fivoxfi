@@ -50,6 +50,24 @@ def search_products():
     return jsonify([_product_json(p) for p in products])
 
 
+@pos_bp.route('/api/products/by-code')
+@login_required_with_tenant
+@require(POS_SELL)
+def product_by_code():
+    """Búsqueda EXACTA por código (lector de código de barras): devuelve el producto o un error claro."""
+    code = request.args.get('code', '').strip()[:100]
+    if not code:
+        return jsonify({'error': 'Código vacío.'}), 400
+    product = Product.query.filter(
+        Product.tenant_id == current_user.tenant_id, Product.is_active.is_(True),
+        db.func.lower(Product.sku) == code.lower()).first()
+    if product is None:
+        return jsonify({'error': f'No hay ningún producto con el código "{code}".'}), 404
+    if product.stock <= 0:
+        return jsonify({'error': f'"{product.name}" no tiene stock.'}), 409
+    return jsonify(_product_json(product))
+
+
 @pos_bp.route('/api/sale', methods=['POST'])
 @login_required_with_tenant
 @require(POS_SELL)

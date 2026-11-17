@@ -11,8 +11,9 @@
             <input id="name" name="name" required maxlength="200" value="{{ val('name', product.name if product else '') }}" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"></div>
         <div><label class="block text-sm font-medium mb-1.5" for="description">Descripción</label>
             <textarea id="description" name="description" rows="2" maxlength="2000" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">{{ val('description', product.description or '' if product else '') }}</textarea></div>
-        <div><label class="block text-sm font-medium mb-1.5" for="sku">SKU / código</label>
-            <input id="sku" name="sku" maxlength="100" value="{{ val('sku', product.sku or '' if product else '') }}" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"></div>
+        <div><label class="block text-sm font-medium mb-1.5" for="sku">Código de barras / SKU</label>
+            <input id="sku" name="sku" maxlength="100" value="{{ val('sku', product.sku or '' if product else '') }}" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            <p class="text-xs text-gray-400 mt-1">Con un lector de códigos de barras, escaneá acá el código del producto: después en el punto de venta se agrega con un solo escaneo.</p></div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><label class="block text-sm font-medium mb-1.5" for="cost_price">Precio de compra *</label>
                 <input id="cost_price" name="cost_price" inputmode="decimal" required value="{{ val('cost_price', product.cost_price if product else '') }}" placeholder="0,00" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"></div>
