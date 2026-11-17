@@ -4,5 +4,6 @@ from .product import Product
 from .sale import Sale, SaleItem
 from .stock_movement import StockMovement
 from .price_change import PriceChange
+from .cash_session import CashSession
 
-__all__ = ['Tenant', 'User', 'Product', 'Sale', 'SaleItem', 'StockMovement', 'PriceChange']
+__all__ = ['Tenant', 'User', 'Product', 'Sale', 'SaleItem', 'StockMovement', 'PriceChange', 'CashSession']

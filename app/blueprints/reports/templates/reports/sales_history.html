@@ -20,6 +20,7 @@
                 <td class="px-4 py-3 text-right font-semibold {{ 'line-through' if s.is_voided }}">{{ s.total_amount|money }}</td>
                 <td class="px-4 py-3 text-right {{ 'line-through' if s.is_voided else 'text-green-700' }}">{{ s.net_profit|money }}</td>
                 <td class="px-4 py-3 text-right whitespace-nowrap">
+                    <a href="{{ url_for('pos.ticket', sale_id=s.id) }}" target="_blank" rel="noopener" class="text-xs text-gray-500 hover:underline mr-3">Ticket</a>
                     {% if s.is_voided %}
                         <span class="text-xs font-semibold text-red-600" title="{{ s.void_reason or '' }}">ANULADA</span>
                     {% elif can('sales.void') %}

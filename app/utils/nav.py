@@ -5,7 +5,7 @@ Turnos aparece en el menú con su estado ("maintenance") y lleva a la pantalla
 de "Módulo en mantenimiento".
 """
 from .permissions import (
-    APPOINTMENTS_VIEW, INVENTORY_MANAGE, INVENTORY_VIEW, MODULE_STATUS, POS_SELL, REPORTS_VIEW,
+    APPOINTMENTS_VIEW, CASH_MANAGE, INVENTORY_MANAGE, INVENTORY_VIEW, MODULE_STATUS, POS_SELL, REPORTS_VIEW,
     TEAM_MANAGE, can,
 )
 
@@ -20,6 +20,7 @@ ICONS = {
     'cash': ['M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z'],
     'box': ['M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'],
     'swap': ['M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'],
+    'drawer': ['M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.6a2 2 0 00-1.8 1.1l-.6 1.2a2 2 0 01-1.8 1.1h-2.4a2 2 0 01-1.8-1.1l-.6-1.2A2 2 0 007.6 13H4'],
     'tag': ['M7 7h.01M7 3h5c.5 0 1 .2 1.4.6l7 7a2 2 0 010 2.8l-5 5a2 2 0 01-2.8 0l-7-7A2 2 0 013 10V5a2 2 0 012-2z'],
     'download': ['M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4'],
     'report': ['M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'],
@@ -39,6 +40,8 @@ NAV_ITEMS = (
          capability=REPORTS_VIEW, group=GROUP_STOCK, match=('dashboard.gestion',)),
     dict(key='pos', label='Punto de venta', endpoint='pos.terminal', icon='cash',
          capability=POS_SELL, group=GROUP_STOCK, match=('pos.',)),
+    dict(key='cash', label='Caja', endpoint='cash.index', icon='drawer',
+         capability=CASH_MANAGE, group=GROUP_STOCK, match=('cash.',)),
     dict(key='inventory', label='Inventario', endpoint='inventory.product_list', icon='box',
          capability=INVENTORY_VIEW, group=GROUP_STOCK, module='inventory',
          match=('inventory.product', 'inventory.stock')),

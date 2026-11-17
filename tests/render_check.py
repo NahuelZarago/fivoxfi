@@ -78,6 +78,10 @@ batches = [{'batch_id': 11, 'created_at': datetime(2026, 3, 1, 12), 'percent': D
 price_row = NS(name='Yerba <img src=x onerror=alert(1)>', old_cost=Decimal('100'), new_cost=Decimal('108'), old_sale=Decimal('150'), new_sale=Decimal('162'))
 pdata = {'percent': Decimal('8.00'), 'applies_to': 'sale', 'rounding': 'none', 'search': '<img src=x onerror=1>', 'scope': 'search'}
 
+cash_open = NS(opened_at=datetime(2026, 3, 1, 9), closed_at=None, opening_amount=Decimal('5000'), opened_by=NS(username='Ana <script>'), closed_by=None, expected_cash=None, counted_cash=None, note=None, difference=None, id=3)
+cash_closed = NS(id=4, opened_at=datetime(2026, 3, 1, 9), closed_at=datetime(2026, 3, 1, 20), opening_amount=Decimal('5000'), opened_by=NS(username='Ana'), closed_by=NS(username='Luis'), expected_cash=Decimal('8000'), counted_cash=Decimal('7900'), note='faltó <b>vuelto</b>', difference=Decimal('-100'))
+cash_sum = {'methods': [{'method': 'cash', 'total': Decimal('3000'), 'count': 3}, {'method': 'card', 'total': Decimal('500'), 'count': 1}], 'total': Decimal('3500'), 'count': 4, 'cash_sales': Decimal('3000'), 'voided': 2, 'expected_cash': Decimal('8000')}
+
 cases = [
     ('public/index.html', {}, 'owner'), ('public/contact.html', {}, 'owner'), ('public/product_landing.html', {'slug': 's'}, 'owner'),
     ('auth/login.html', {'email': 'a@b.com', 'error': None}, 'owner'), ('auth/login.html', {'email': 'a@b.com', 'error': 'Email o contraseña incorrectos.'}, 'owner'), ('auth/register.html', {'form': {'username': 'x', 'email': 'y'}, 'errors': {}}, 'owner'), ('auth/register.html', {'form': {'username': '', 'email': 'y'}, 'errors': {'username': 'El nombre es obligatorio.', 'email': 'Email inválido', 'password': 'x', 'confirm_password': 'y'}}, 'owner'),
@@ -102,6 +106,12 @@ cases = [
     ('admin/index.html', {'s': {k: 1 for k in ('tenants','tenants_active','users','unverified','no_business','new_users_week','new_tenants_week','products','sales')}}, 'owner'),
     ('admin/tenants.html', {'rows': Page([(NS(id=1, name='Kiosco <b>Pepe</b>', plan='basic', is_active=True, created_at=datetime(2026,3,1)), 3, 4, 5, 'o@x.com')]), 'q': '<script>', 'plans': ['basic', 'pro']}, 'owner'),
     ('admin/users.html', {'rows': Page([NS(id=5, username='Ana <script>', email='a@x.com', role_label='Empleado', tenant=tenant, is_active=True, is_email_confirmed=False, is_superadmin=False, is_owner=False, tenant_id=1)]), 'q': ''}, 'owner'),
+    ('pos/ticket.html', {'sale': NS(id=7, created_at=datetime(2026, 3, 1, 12), seller=NS(username='Ana <script>'), is_voided=True, payment_method='cash', total_amount=Decimal('301'), items=[NS(quantity=2, product_name='Yerba <img src=x onerror=alert(1)>', unit_sale_price=Decimal('150.5'))]), 'tenant': tenant, 'auto_print': True}, 'employee'),
+    ('cash/index.html', {'session': None, 's': None, 'history': None}, 'employee'),
+    ('cash/index.html', {'session': cash_open, 's': cash_sum, 'history': None}, 'employee'),
+    ('cash/index.html', {'session': cash_open, 's': cash_sum, 'history': Page([cash_closed])}, 'owner'),
+    ('cash/detail.html', {'session': cash_closed, 's': cash_sum}, 'owner'),
+    ('cash/print.html', {'session': cash_closed, 's': cash_sum, 'tenant': tenant, 'auto_print': True}, 'owner'),
     ('inventory/movements.html', {'rows': Page([(mv, 'Yerba')]), 'reason': '', 'reasons': labels}, 'owner'),
     ('pos/terminal.html', {'products': [{'id': 1, 'name': '</script><b>', 'sku': '', 'price': '10.00', 'stock': 3}], 'methods': [('cash', 'Efectivo')]}, 'employee'),
     ('reports/daily_close.html', {'close': close, 'day': date(2026, 3, 1), 'today': date(2026, 3, 2), 'prev_day': date(2026, 2, 28), 'next_day': date(2026, 3, 2)}, 'owner'),

@@ -83,6 +83,7 @@ def _register_blueprints(app):
     from .blueprints.admin import admin_bp
     from .blueprints.appointments import appointments_bp
     from .blueprints.auth import auth_bp
+    from .blueprints.cash import cash_bp
     from .blueprints.dashboard import dashboard_bp
     from .blueprints.exports import exports_bp
     from .blueprints.inventory import inventory_bp
@@ -94,6 +95,7 @@ def _register_blueprints(app):
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(dashboard_bp, url_prefix='/app/dashboard')
     app.register_blueprint(inventory_bp, url_prefix='/app/inventory')
+    app.register_blueprint(cash_bp, url_prefix='/app/caja')
     app.register_blueprint(pos_bp, url_prefix='/app/pos')
     app.register_blueprint(reports_bp, url_prefix='/app/reports')
     app.register_blueprint(admin_bp, url_prefix='/admin')

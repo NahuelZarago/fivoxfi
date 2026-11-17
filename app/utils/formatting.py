@@ -11,9 +11,11 @@ def format_money(value, decimals=2):
     except InvalidOperation:
         number = Decimal(0)
     quant = Decimal(1).scaleb(-decimals)  # 2 -> 0.01, 0 -> 1
-    text = f'{number.quantize(quant):,.{decimals}f}'
+    number = number.quantize(quant)
+    sign = '-' if number < 0 else ''          # -$1.000,00 (y nunca "-$0,00")
+    text = f'{abs(number):,.{decimals}f}'
     # '1,234.50' -> '1.234,50' (cambiar separadores sin pisarse)
-    return '$' + text.replace(',', '\0').replace('.', ',').replace('\0', '.')
+    return sign + '$' + text.replace(',', '\0').replace('.', ',').replace('\0', '.')
 
 
 def format_money0(value):

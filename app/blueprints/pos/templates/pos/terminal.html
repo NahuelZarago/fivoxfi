@@ -6,6 +6,12 @@
     <span class="text-sm text-gray-500">Operador: <strong>{{ current_user.username }}</strong></span>
 </div>
 
+{% if not cash_open and can('cash.manage') %}
+<div class="bg-amber-50 border border-amber-200 text-amber-900 text-sm rounded-2xl px-4 py-3 mb-5">
+    La caja está cerrada. Podés vender igual, pero para llevar el control del efectivo <a href="{{ url_for('cash.index') }}" class="font-semibold underline">abrí la caja</a> primero.
+</div>
+{% endif %}
+
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div class="lg:col-span-2 space-y-4">
         <div class="bg-white rounded-2xl border border-gray-200 p-4">
@@ -45,7 +51,10 @@
         <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl text-green-600" aria-hidden="true">✓</div>
         <h3 id="successTitle" class="text-xl font-bold mb-2">¡Venta registrada!</h3>
         <p id="successMsg" class="text-gray-500 text-sm mb-6"></p>
-        <button id="newSaleBtn" type="button" class="bg-green-600 text-white font-semibold px-8 py-2.5 rounded-xl hover:bg-green-700">Nueva venta</button>
+        <div class="flex flex-col gap-2 items-center">
+            <button id="newSaleBtn" type="button" class="bg-green-600 text-white font-semibold px-8 py-2.5 rounded-xl hover:bg-green-700">Nueva venta</button>
+            <a id="ticketLink" href="#" target="_blank" rel="noopener" class="text-sm text-gray-500 hover:underline">🧾 Ver / imprimir ticket</a>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -164,6 +173,7 @@
             var data = await res.json().catch(function () { return {}; });
             if (res.ok && data.success) {
                 document.getElementById('successMsg').textContent = data.message;
+                document.getElementById('ticketLink').href = '/app/pos/ticket/' + encodeURIComponent(data.sale_id) + '?print=1';
                 var m = document.getElementById('successModal');
                 m.classList.remove('hidden'); m.classList.add('flex');
                 document.getElementById('newSaleBtn').focus();

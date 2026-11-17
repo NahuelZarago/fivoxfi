@@ -1,0 +1,28 @@
+{% extends "base_app.html" %}
+{% block title %}Cierre de caja{% endblock %}
+{% block content %}
+<a href="{{ url_for('cash.index') }}" class="text-sm text-gray-500 hover:underline">← Volver a Caja</a>
+<div class="flex items-center justify-between flex-wrap gap-3 mt-2 mb-1">
+    <h1 class="text-2xl font-bold">Cierre de caja</h1>
+    {% if session.closed_at %}<a href="{{ url_for('cash.print_view', session_id=session.id, print=1) }}" target="_blank" rel="noopener" class="border border-gray-300 font-semibold px-4 py-2 rounded-xl hover:bg-gray-50 text-sm">🖨 Imprimir cierre</a>{% endif %}
+</div>
+<p class="text-gray-500 text-sm mb-6">{{ session.opened_at|local_dt }} → {% if session.closed_at %}{{ session.closed_at|local_dt }}{% else %}abierta{% endif %}
+    · abrió {{ session.opened_by.username if session.opened_by else '—' }}{% if session.closed_by %} · cerró {{ session.closed_by.username }}{% endif %}</p>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-5 max-w-4xl">
+    <div class="bg-white rounded-2xl border border-gray-200 p-6">
+        <h2 class="font-bold mb-3">Arqueo de efectivo</h2>
+        <dl class="space-y-1 text-sm">
+            <div class="flex justify-between"><dt>Efectivo inicial</dt><dd>{{ session.opening_amount|money }}</dd></div>
+            <div class="flex justify-between"><dt>+ Ventas en efectivo</dt><dd>{{ s.cash_sales|money }}</dd></div>
+            <div class="flex justify-between border-t pt-2"><dt class="font-semibold">Esperado</dt><dd class="font-semibold">{{ (session.expected_cash if session.expected_cash is not none else s.expected_cash)|money }}</dd></div>
+            {% if session.counted_cash is not none %}
+            <div class="flex justify-between"><dt class="font-semibold">Contado</dt><dd class="font-semibold">{{ session.counted_cash|money }}</dd></div>
+            <div class="flex justify-between text-base border-t pt-2"><dt class="font-bold">Diferencia</dt>
+                <dd class="font-bold {{ 'text-green-700' if session.difference == 0 else ('text-amber-600' if session.difference > 0 else 'text-red-600') }}">{{ '+' if session.difference > 0 }}{{ session.difference|money }} <span class="text-xs font-normal">{{ 'exacto' if session.difference == 0 else ('sobra' if session.difference > 0 else 'falta') }}</span></dd></div>
+            {% endif %}
+        </dl>
+        {% if session.note %}<p class="text-sm text-gray-500 mt-3">Nota: {{ session.note }}</p>{% endif %}
+    </div>
+    {% include "cash/_summary.html" %}
+</div>
+{% endblock %}

@@ -31,15 +31,16 @@ REPORTS_VIEW = 'reports.view'                # Panel de métricas, reportes, his
 TEAM_MANAGE = 'team.manage'                  # Equipo y códigos de invitación
 BUSINESS_SETTINGS = 'business.settings'      # Datos del negocio
 APPOINTMENTS_VIEW = 'appointments.view'      # Módulo de Turnos
+CASH_MANAGE = 'cash.manage'                  # Abrir y cerrar la caja
 
 ALL_CAPABILITIES = frozenset({
     INVENTORY_VIEW, INVENTORY_MANAGE, STOCK_ENTRY, STOCK_ADJUST, POS_SELL,
-    SALES_VOID, REPORTS_VIEW, TEAM_MANAGE, BUSINESS_SETTINGS, APPOINTMENTS_VIEW,
+    SALES_VOID, REPORTS_VIEW, TEAM_MANAGE, BUSINESS_SETTINGS, APPOINTMENTS_VIEW, CASH_MANAGE,
 })
 
 ROLE_CAPABILITIES = {
     ROLE_OWNER: ALL_CAPABILITIES,
-    ROLE_EMPLOYEE: frozenset({INVENTORY_VIEW, STOCK_ENTRY, POS_SELL}),
+    ROLE_EMPLOYEE: frozenset({INVENTORY_VIEW, STOCK_ENTRY, POS_SELL, CASH_MANAGE}),
     ROLE_CLIENT: frozenset({APPOINTMENTS_VIEW}),
 }
 

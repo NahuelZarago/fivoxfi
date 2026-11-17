@@ -1,0 +1,17 @@
+{# Ventas del turno por medio de pago. Variables: s (resumen), session #}
+<div class="bg-white rounded-2xl border border-gray-200 p-6">
+    <h2 class="font-bold mb-3">Ventas del turno</h2>
+    <table class="w-full text-sm">
+        <tbody class="divide-y divide-gray-100">
+        {% for m in s.methods %}
+            <tr><td class="py-2">{{ m.method|payment_label }} <span class="text-xs text-gray-400">({{ m.count }})</span></td>
+                <td class="py-2 text-right font-medium">{{ m.total|money }}</td></tr>
+        {% else %}<tr><td class="py-3 text-gray-400">Todavía no hubo ventas en este turno.</td><td></td></tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr class="border-t-2"><td class="py-2 font-bold">Total vendido</td><td class="py-2 text-right font-bold">{{ s.total|money }}</td></tr>
+        </tfoot>
+    </table>
+    {% if s.voided %}<p class="text-xs text-gray-400 mt-2">{{ s.voided }} venta{{ 's' if s.voided != 1 }} anulada{{ 's' if s.voided != 1 }} (no se cuenta{{ 'n' if s.voided != 1 }}).</p>{% endif %}
+</div>

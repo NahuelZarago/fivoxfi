@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>Ticket #{{ sale.id }}</title>
+    <style>
+        body { font-family: "Courier New", monospace; font-size: 12px; color: #000; margin: 0; background: #f3f4f6; }
+        .ticket { width: 72mm; max-width: 100%; margin: 12px auto; background: #fff; padding: 10px 8px; }
+        h1 { font-size: 15px; text-align: center; margin: 0 0 2px; }
+        .c { text-align: center; } .r { text-align: right; }
+        hr { border: 0; border-top: 1px dashed #000; margin: 8px 0; }
+        table { width: 100%; border-collapse: collapse; }
+        td { vertical-align: top; padding: 1px 0; }
+        .tot { font-size: 15px; font-weight: bold; }
+        .void { border: 2px solid #000; text-align: center; font-weight: bold; padding: 4px; margin: 6px 0; }
+        .actions { text-align: center; margin: 12px; font-family: system-ui, sans-serif; }
+        .actions button, .actions a { font-size: 14px; padding: 8px 16px; border-radius: 8px; border: 1px solid #16a34a; background: #16a34a; color: #fff; cursor: pointer; text-decoration: none; }
+        .actions a { background: #fff; color: #374151; border-color: #d1d5db; margin-left: 6px; }
+        @media print { body { background: #fff; } .ticket { margin: 0; width: 100%; } .actions { display: none; } }
+    </style>
+</head>
+<body>
+<div class="actions">
+    <button type="button" onclick="window.print()">Imprimir</button>
+    <a href="javascript:window.close()">Cerrar</a>
+</div>
+<div class="ticket">
+    <h1>{{ tenant.name }}</h1>
+    <p class="c" style="margin:0">Comprobante no fiscal</p>
+    <hr>
+    <table>
+        <tr><td>Venta N° {{ sale.id }}</td><td class="r">{{ sale.created_at|local_dt }}</td></tr>
+        <tr><td colspan="2">Atendió: {{ sale.seller.username if sale.seller else '—' }}</td></tr>
+    </table>
+    {% if sale.is_voided %}<div class="void">VENTA ANULADA</div>{% endif %}
+    <hr>
+    <table>
+        {% for i in sale['items'] %}
+        <tr><td colspan="2">{{ i.product_name }}</td></tr>
+        <tr><td>{{ i.quantity }} × {{ i.unit_sale_price|money }}</td><td class="r">{{ (i.unit_sale_price * i.quantity)|money }}</td></tr>
+        {% endfor %}
+    </table>
+    <hr>
+    <table>
+        <tr class="tot"><td>TOTAL</td><td class="r">{{ sale.total_amount|money }}</td></tr>
+        <tr><td>Pago</td><td class="r">{{ sale.payment_method|payment_label }}</td></tr>
+    </table>
+    <hr>
+    <p class="c" style="margin:0">¡Gracias por su compra!</p>
+</div>
+{% if auto_print %}<script>window.addEventListener('load', function () { setTimeout(function () { window.print(); }, 300); });</script>{% endif %}
+</body>
+</html>

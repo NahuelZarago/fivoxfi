@@ -38,6 +38,11 @@ docker compose exec web flask --app run make-admin tu@email.com   # sin Docker: 
 ```
 La migración `005` (columna `is_superadmin` y tabla `price_changes`) se aplica sola con `db upgrade`.
 
+## Novedades v5
+- **Caja** (menú *Caja*, dueño y empleados): se abre con el efectivo inicial y se cierra contando el efectivo. Calcula lo esperado (inicial + ventas en efectivo del turno, sin anuladas) y muestra si sobra o falta. Una sola caja abierta por negocio; el dueño ve el historial de cierres.
+- **Tickets**: tras cada venta, "Ver / imprimir ticket" (formato 80 mm, comprobante no fiscal). También desde el historial de ventas. Cada empleado ve solo sus tickets.
+- Migración `006` (tabla `cash_sessions`), se aplica sola con `db upgrade`.
+
 ## Tests
 ```bash
 python tests/static_checks.py   # plantillas, endpoints, imports, CSRF en formularios

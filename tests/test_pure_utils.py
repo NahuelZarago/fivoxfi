@@ -31,6 +31,8 @@ def test_parse_money_rejects(raw):
 def test_format_money():
     assert formatting.format_money(Decimal('1234.5')) == '$1.234,50'
     assert formatting.format_money(0) == '$0,00'
+    assert formatting.format_money(Decimal('-1000')) == '-$1.000,00'
+    assert formatting.format_money(Decimal('-0.001')) == '$0,00'
     assert formatting.format_money(None) == '$0,00'
     assert formatting.format_money0(Decimal('1234.6')) == '$1.235'
 
@@ -123,6 +125,7 @@ def test_permission_matrix():
     for cap in (perm.REPORTS_VIEW, perm.SALES_VOID, perm.STOCK_ADJUST, perm.TEAM_MANAGE,
                 perm.INVENTORY_MANAGE, perm.APPOINTMENTS_VIEW):
         assert not perm.can('employee', cap)
+    assert perm.can('employee', perm.CASH_MANAGE) and not perm.can('client', perm.CASH_MANAGE)
     assert perm.can('client', perm.APPOINTMENTS_VIEW) and not perm.can('client', perm.POS_SELL)
     assert not perm.can(None, perm.POS_SELL) and not perm.can('hacker', perm.POS_SELL)
     with pytest.raises(ValueError):
