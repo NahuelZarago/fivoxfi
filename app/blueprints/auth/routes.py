@@ -1,4 +1,5 @@
 import hmac
+from datetime import datetime
 
 from flask import current_app, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user
@@ -11,6 +12,7 @@ from ...services.google_oauth import login_or_create
 from ...services.tenants import create_tenant_for_owner, join_with_code
 from ...utils import google_auth as google
 from ...utils.csrf import rotate_csrf_token
+from ...utils.legal import TERMS_VERSION
 from ...utils.mailer import (
     RESET_MAX_AGE, SALT_RESET, SALT_VERIFY, VERIFY_MAX_AGE, read_token,
     send_password_reset_email, send_verification_email)
@@ -49,7 +51,8 @@ def register():
 
     form, errors = {}, {}
     if request.method == 'POST':
-        form = {'username': request.form.get('username', ''), 'email': request.form.get('email', '')}
+        form = {'username': request.form.get('username', ''), 'email': request.form.get('email', ''),
+                'accept_terms': request.form.get('accept_terms') == '1'}
         password = request.form.get('password', '')
         username = email = None
 
@@ -69,13 +72,15 @@ def register():
                 errors[key] = str(exc)
         if 'password' not in errors and password != request.form.get('confirm_password', ''):
             errors['confirm_password'] = 'Las contraseñas no coinciden.'
+        if not form['accept_terms']:
+            errors['accept_terms'] = 'Tenés que aceptar los Términos y Condiciones para crear tu cuenta.'
         if email and 'email' not in errors and User.query.filter_by(email=email).first():
             errors['email'] = 'Ya existe una cuenta con ese email. ¿Querés iniciar sesión?'
 
         if errors:
             return render_template('auth/register.html', form=form, errors=errors), 400
 
-        user = User(email=email, username=username)
+        user = User(email=email, username=username, terms_accepted_at=datetime.utcnow(), terms_version=TERMS_VERSION)
         user.set_password(password)
         db.session.add(user)
         db.session.commit()

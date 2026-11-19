@@ -90,3 +90,10 @@ Sugerido: correr `pytest` con `TEST_DATABASE_URL` apuntando a un Postgres para v
 ## Modo claro / oscuro
 
 Cada persona elige su tema con el botón **Modo oscuro / Modo claro** (al pie del menú lateral, y arriba a la derecha en login y registro). La elección queda guardada en el navegador; si nunca la tocó, se usa la configuración del sistema. La página pública (landing, contacto) y los comprobantes imprimibles se mantienen siempre claros. Los colores oscuros viven en `app/static/css/dark.css`; `tests/test_theme.py` falla si una plantilla usa un color sin versión oscura.
+
+## Términos y Condiciones
+
+- Páginas públicas: `/terminos` y `/privacidad` (textos en `app/blueprints/public/templates/public/terms.html` y `privacy.html`), enlazadas desde el pie de la página de inicio y desde el registro.
+- El registro con email exige tildar «Hacé clic acá para aceptar los Términos y Condiciones…»; se guarda `terms_accepted_at` y `terms_version` en cada usuario (migración `009`). Las cuentas nuevas creadas con Google también quedan registradas (el botón lleva un aviso de aceptación).
+- Al cambiar el texto de forma relevante, actualizá `TERMS_VERSION` y `TERMS_UPDATED_LABEL` en `app/utils/legal.py`.
+- Importante: los textos son una base razonable para Argentina (Ley 25.326, Ley 24.240), no asesoramiento legal. Conviene que los revise un abogado antes de cobrar, y completar razón social/CUIT/domicilio cuando tengas.

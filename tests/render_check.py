@@ -83,7 +83,8 @@ cash_closed = NS(id=4, opened_at=datetime(2026, 3, 1, 9), closed_at=datetime(202
 cash_sum = {'methods': [{'method': 'cash', 'total': Decimal('3000'), 'count': 3}, {'method': 'card', 'total': Decimal('500'), 'count': 1}], 'total': Decimal('3500'), 'count': 4, 'cash_sales': Decimal('3000'), 'voided': 2, 'expected_cash': Decimal('8000')}
 
 cases = [
-    ('public/index.html', {}, 'owner'), ('public/contact.html', {}, 'owner'), ('public/product_landing.html', {'slug': 's'}, 'owner'),
+    ('public/index.html', {}, 'owner'), ('public/contact.html', {}, 'owner'), ('public/terms.html', {'terms_updated': '18 de noviembre de 2026'}, 'owner'), ('public/privacy.html', {'terms_updated': '18 de noviembre de 2026'}, 'owner'),
+    ('auth/register.html', {'form': {'accept_terms': True}, 'errors': {'accept_terms': 'Tenés que aceptar'}}, 'owner'), ('public/product_landing.html', {'slug': 's'}, 'owner'),
     ('auth/login.html', {'email': 'a@b.com', 'error': None}, 'owner'), ('auth/login.html', {'email': 'a@b.com', 'error': 'Email o contraseña incorrectos.'}, 'owner'), ('auth/register.html', {'form': {'username': 'x', 'email': 'y'}, 'errors': {}}, 'owner'), ('auth/register.html', {'form': {'username': '', 'email': 'y'}, 'errors': {'username': 'El nombre es obligatorio.', 'email': 'Email inválido', 'password': 'x', 'confirm_password': 'y'}}, 'owner'),
     ('auth/login.html', {'email': '', 'error': None, 'google_enabled': True}, 'owner'), ('auth/register.html', {'form': {}, 'errors': {}, 'google_enabled': True}, 'owner'),
     ('auth/choose_role.html', {}, 'owner'), ('auth/join.html', {}, 'owner'), ('auth/setup_owner.html', {}, 'owner'),

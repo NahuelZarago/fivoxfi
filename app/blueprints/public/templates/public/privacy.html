@@ -1,0 +1,38 @@
+{% extends 'public/legal_base.html' %}
+{% block title %}Política de Privacidad{% endblock %}
+{% block heading %}Política de Privacidad{% endblock %}
+{% block body %}
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">1. Quién es responsable</h2>
+<p class="text-gray-600 leading-relaxed mb-3">Fivox es responsable del tratamiento de los datos personales que se describen en esta política, de acuerdo con la Ley 25.326 de Protección de los Datos Personales de la República Argentina. Podés contactarnos desde la página de <a href="{{ url_for('public.contact') }}" class="text-green-700 font-semibold hover:underline">Contacto</a>.</p>
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">2. Qué datos recolectamos</h2>
+<ul class="list-disc pl-6 text-gray-600 leading-relaxed space-y-1.5 mb-3">
+    <li><strong>Datos de tu cuenta:</strong> nombre, email y contraseña (guardada cifrada, nunca en texto legible). Si entrás con Google, recibimos tu nombre, tu email verificado y un identificador de tu cuenta de Google. No accedemos a tu contraseña de Google, ni a tus correos, contactos o archivos.</li>
+    <li><strong>Datos de tu negocio:</strong> productos, precios, stock, proveedores, ventas, cajas y miembros del equipo que vos o tu equipo cargan.</li>
+    <li><strong>Datos técnicos:</strong> cookie de sesión para mantenerte conectado, dirección IP y registros de seguridad para prevenir abusos, y una preferencia de tema (claro/oscuro) guardada en tu navegador.</li>
+    <li>Aceptación de los Términos: guardamos la fecha y la versión que aceptaste.</li>
+</ul>
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">3. Para qué los usamos</h2>
+<ul class="list-disc pl-6 text-gray-600 leading-relaxed space-y-1.5 mb-3">
+    <li>Crear y mantener tu cuenta y prestar el Servicio.</li>
+    <li>Enviarte emails necesarios (verificación de email, recuperación de contraseña).</li>
+    <li>Proteger el Servicio contra fraudes y accesos indebidos.</li>
+    <li>Cumplir obligaciones legales y atender reclamos.</li>
+</ul>
+<p class="text-gray-600 leading-relaxed mb-3">No vendemos tus datos ni los usamos para publicidad de terceros.</p>
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">4. Con quién los compartimos</h2>
+<p class="text-gray-600 leading-relaxed mb-3">Solo con proveedores que nos ayudan a operar el Servicio (alojamiento de servidores, envío de emails e inicio de sesión con Google), que los tratan únicamente para ese fin, y con autoridades cuando una ley o una orden judicial lo exija. Los datos de un negocio nunca se muestran a otros negocios.</p>
+<p class="text-gray-600 leading-relaxed mb-3">Algunos proveedores pueden estar ubicados fuera de la Argentina; en ese caso procuramos que ofrezcan niveles adecuados de protección.</p>
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">5. Cuánto tiempo los conservamos</h2>
+<p class="text-gray-600 leading-relaxed mb-3">Mientras tu cuenta esté activa. Si la eliminás, borramos o anonimizamos tus datos, salvo los que debamos conservar por obligación legal o para defender derechos ante un reclamo.</p>
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">6. Tus derechos</h2>
+<p class="text-gray-600 leading-relaxed mb-3">Podés acceder a tus datos, rectificarlos, actualizarlos o pedir su supresión. El derecho de acceso puede ejercerse en forma gratuita a intervalos no inferiores a seis meses, salvo interés legítimo acreditado (art. 14, Ley 25.326). Podés exportar tus datos y eliminar tu cuenta desde Configuración, o escribirnos desde Contacto.</p>
+<p class="text-gray-600 leading-relaxed mb-3">La Agencia de Acceso a la Información Pública, en su carácter de órgano de control de la Ley 25.326, tiene la atribución de atender las denuncias y reclamos que se interpongan con relación al incumplimiento de las normas sobre protección de datos personales.</p>
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">7. Seguridad</h2>
+<p class="text-gray-600 leading-relaxed mb-3">Aplicamos medidas técnicas y organizativas razonables: contraseñas cifradas, conexión segura, aislamiento de datos entre negocios, control de permisos por rol y límites de intentos de acceso. Ningún sistema es infalible: si detectáramos un incidente que te afecte, te lo informaremos.</p>
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">8. Cookies y almacenamiento local</h2>
+<p class="text-gray-600 leading-relaxed mb-3">Usamos una cookie de sesión (necesaria para iniciar sesión y proteger los formularios) y, si elegís «recordarme», una cookie persistente. Guardamos tu elección de tema en el almacenamiento local de tu navegador. No usamos cookies publicitarias.</p>
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">9. Menores de edad</h2>
+<p class="text-gray-600 leading-relaxed mb-3">El Servicio está dirigido a personas mayores de 18 años. Si descubrimos que se registró un menor, podemos cerrar la cuenta.</p>
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">10. Cambios en esta política</h2>
+<p class="text-gray-600 leading-relaxed mb-3">Podemos actualizar esta política. La fecha de la última versión figura al comienzo de esta página; si los cambios son importantes, te avisaremos.</p>
+{% endblock %}

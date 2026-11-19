@@ -1,11 +1,13 @@
 """Alta e inicio de sesión de cuentas que entran con Google (la parte con base de datos)."""
 import secrets
+from datetime import datetime
 
 from sqlalchemy.exc import IntegrityError
 
 from ..extensions import db
 from ..models.user import User
 from ..utils.google_auth import GoogleAuthError
+from ..utils.legal import TERMS_VERSION
 
 
 def login_or_create(profile):
@@ -31,7 +33,7 @@ def login_or_create(profile):
             db.session.commit()
             return user, False
         user = User(email=profile['email'], username=profile['name'], google_sub=profile['sub'],
-                    is_email_confirmed=True)
+                    is_email_confirmed=True, terms_accepted_at=datetime.utcnow(), terms_version=TERMS_VERSION)
         user.set_password(secrets.token_urlsafe(32))      # contraseña inutilizable: entra con Google
         db.session.add(user)
         db.session.commit()

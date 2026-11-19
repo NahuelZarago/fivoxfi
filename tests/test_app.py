@@ -371,7 +371,7 @@ def test_error_pages(client):
 
 
 def test_landing_and_public_pages(client):
-    for url in ['/', '/contacto', '/auth/login', '/auth/registro', '/auth/olvide-mi-contrasena']:
+    for url in ['/', '/contacto', '/terminos', '/privacidad', '/auth/login', '/auth/registro', '/auth/olvide-mi-contrasena']:
         assert client.get(url).status_code == 200, url
 
 
@@ -400,16 +400,16 @@ def test_register_shows_all_field_errors_inline(client):
 
 def test_register_password_mismatch_and_duplicate_email(client, shop):
     r = client.post('/auth/registro', data={'username': 'Ana', 'email': 'nuevo@x.com', 'password': 'Clave1234',
-                                            'confirm_password': 'Clave9999'})
+                                            'confirm_password': 'Clave9999', 'accept_terms': '1'})
     assert r.status_code == 400 and 'Las contraseñas no coinciden.' in r.get_data(as_text=True)
     r = client.post('/auth/registro', data={'username': 'Ana', 'email': shop['owner'].email, 'password': 'Clave1234',
-                                            'confirm_password': 'Clave1234'})
+                                            'confirm_password': 'Clave1234', 'accept_terms': '1'})
     assert r.status_code == 400 and 'Ya existe una cuenta' in r.get_data(as_text=True)
 
 
 def test_register_ok_creates_user_and_logs_in(client, app):
     r = client.post('/auth/registro', data={'username': 'Ana', 'email': 'ana@x.com', 'password': 'Clave1234',
-                                            'confirm_password': 'Clave1234'})
+                                            'confirm_password': 'Clave1234', 'accept_terms': '1'})
     assert r.status_code == 302 and r.headers['Location'].endswith('/auth/verificacion-pendiente')
     assert User.query.filter_by(email='ana@x.com').one().username == 'Ana'
 

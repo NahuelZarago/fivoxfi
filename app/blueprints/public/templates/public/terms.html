@@ -1,0 +1,53 @@
+{% extends 'public/legal_base.html' %}
+{% block title %}Términos y Condiciones{% endblock %}
+{% block heading %}Términos y Condiciones de Uso{% endblock %}
+{% block body %}
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">1. Quiénes somos y aceptación</h2>
+<p class="text-gray-600 leading-relaxed mb-3">Fivox es una plataforma web de gestión para negocios locales (el «Servicio»). Estos Términos y Condiciones regulan el uso del Servicio por parte de cualquier persona que cree una cuenta o lo utilice («vos» o el «Usuario»).</p>
+<p class="text-gray-600 leading-relaxed mb-3">Al crear una cuenta, tildar la casilla de aceptación o usar el Servicio, declarás que leíste y aceptás estos Términos y la <a href="{{ url_for('public.privacy') }}" class="text-green-700 font-semibold hover:underline">Política de Privacidad</a>. Si no estás de acuerdo, no uses el Servicio.</p>
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">2. Qué ofrece el Servicio</h2>
+<p class="text-gray-600 leading-relaxed mb-3">Fivox permite administrar inventario, ventas en punto de venta, caja diaria, categorías y proveedores, reportes, exportación de datos y equipos de trabajo con distintos permisos. Algunos módulos pueden figurar como «próximamente» o «en mantenimiento» y todavía no estar disponibles.</p>
+<p class="text-gray-600 leading-relaxed mb-3">El Servicio está en desarrollo continuo: podemos agregar, modificar o quitar funciones. Si un cambio afecta de forma importante lo que usás, vamos a avisarte con anticipación razonable.</p>
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">3. Tu cuenta</h2>
+<ul class="list-disc pl-6 text-gray-600 leading-relaxed space-y-1.5 mb-3">
+    <li>Tenés que ser mayor de 18 años y tener capacidad legal para contratar. Si usás Fivox en nombre de un negocio, declarás tener autorización para obligarlo.</li>
+    <li>Debés brindar datos veraces y mantenerlos actualizados.</li>
+    <li>Sos responsable de la confidencialidad de tu contraseña y de tu cuenta de Google, y de todo lo que ocurra desde tu cuenta. Avisanos de inmediato si sospechás un acceso no autorizado.</li>
+    <li>El dueño de un negocio es responsable de las personas que invita (empleados y clientes), de los permisos que les asigna y del uso que hagan del Servicio.</li>
+</ul>
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">4. Uso permitido</h2>
+<p class="text-gray-600 leading-relaxed mb-3">Te comprometés a usar el Servicio de forma lícita. Está prohibido:</p>
+<ul class="list-disc pl-6 text-gray-600 leading-relaxed space-y-1.5 mb-3">
+    <li>intentar acceder a datos de otros negocios o a partes del sistema que no te corresponden;</li>
+    <li>probar, alterar o sobrecargar la seguridad o el funcionamiento del Servicio (por ejemplo, con ataques, escaneos automatizados o accesos masivos);</li>
+    <li>cargar contenido ilegal, o que infrinja derechos de terceros, o código malicioso;</li>
+    <li>revender, sublicenciar o ceder el acceso al Servicio sin nuestra autorización;</li>
+    <li>usar el Servicio para actividades fraudulentas o para engañar a terceros.</li>
+</ul>
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">5. Tus datos</h2>
+<p class="text-gray-600 leading-relaxed mb-3">Los datos que cargás (productos, precios, ventas, movimientos, caja, equipo) son tuyos. Nos otorgás una licencia limitada, no exclusiva y solo mientras uses el Servicio, para almacenarlos, procesarlos y mostrártelos con el único fin de prestarlo.</p>
+<p class="text-gray-600 leading-relaxed mb-3">Podés exportar tus datos en Excel o CSV desde el Servicio y eliminar tu cuenta cuando quieras desde Configuración. Sos responsable de que los datos de tus empleados y clientes que cargues en Fivox se traten con derecho a hacerlo.</p>
+<p class="text-gray-600 leading-relaxed mb-3">El tratamiento de datos personales se describe en la Política de Privacidad.</p>
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">6. Planes y pagos</h2>
+<p class="text-gray-600 leading-relaxed mb-3">Hoy el Servicio se ofrece sin costo. Si en el futuro incorporamos planes pagos, te vamos a informar con claridad los precios, impuestos y condiciones antes de cobrarte, y los cambios a un plan vigente se avisarán con al menos 30 días de anticipación. Nunca vamos a cobrarte sin tu consentimiento previo.</p>
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">7. Obligaciones fiscales y contables</h2>
+<p class="text-gray-600 leading-relaxed mb-3">Fivox es una herramienta de gestión interna. Los tickets y comprobantes que emite <strong>no son comprobantes fiscales</strong> ni reemplazan la facturación electrónica exigida por ARCA (ex AFIP) u otro organismo. Cumplir con las obligaciones impositivas, contables, laborales y de defensa del consumidor de tu negocio es tu exclusiva responsabilidad.</p>
+<p class="text-gray-600 leading-relaxed mb-3">Los reportes y cálculos (ganancias, márgenes, cierres de caja) se basan en los datos que vos cargás: revisalos antes de tomar decisiones o presentarlos ante terceros.</p>
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">8. Disponibilidad y copias de seguridad</h2>
+<p class="text-gray-600 leading-relaxed mb-3">Hacemos esfuerzos razonables para que el Servicio esté disponible y para resguardar tus datos, pero no garantizamos un funcionamiento ininterrumpido ni libre de errores. Pueden existir interrupciones por mantenimiento, fallas de proveedores o causas ajenas a nuestro control.</p>
+<p class="text-gray-600 leading-relaxed mb-3">Te recomendamos exportar tus datos periódicamente como respaldo propio.</p>
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">9. Limitación de responsabilidad</h2>
+<p class="text-gray-600 leading-relaxed mb-3">En la máxima medida permitida por la ley, el Servicio se brinda «tal como está» y Fivox no responde por lucro cesante, pérdida de ventas o de datos, ni por daños indirectos derivados del uso o la imposibilidad de uso del Servicio, ni por errores en los datos cargados por los usuarios.</p>
+<p class="text-gray-600 leading-relaxed mb-3">Nada de lo dispuesto en estos Términos limita derechos que la ley te reconoce de manera irrenunciable, incluidos los de la Ley 24.240 de Defensa del Consumidor cuando resulte aplicable.</p>
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">10. Suspensión y baja</h2>
+<p class="text-gray-600 leading-relaxed mb-3">Podés dejar de usar Fivox y eliminar tu cuenta en cualquier momento. Podemos suspender o cerrar cuentas que incumplan estos Términos, pongan en riesgo la seguridad del Servicio o se usen con fines ilícitos, intentando avisarte cuando corresponda.</p>
+<p class="text-gray-600 leading-relaxed mb-3">Al eliminarse una cuenta o negocio, sus datos se borran o anonimizan, salvo la información que debamos conservar por obligación legal o para resguardar derechos ante un reclamo.</p>
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">11. Propiedad intelectual</h2>
+<p class="text-gray-600 leading-relaxed mb-3">El software, el diseño, las marcas y los contenidos de Fivox son de su titular y están protegidos por la ley. Estos Términos no te transfieren ningún derecho sobre ellos más allá del uso del Servicio conforme a este documento.</p>
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">12. Cambios en los Términos</h2>
+<p class="text-gray-600 leading-relaxed mb-3">Podemos actualizar estos Términos. La fecha de la última versión figura al comienzo de esta página. Si los cambios son importantes, te lo avisaremos por email o dentro del Servicio. Seguir usando Fivox después de un cambio implica aceptar la nueva versión.</p>
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">13. Ley aplicable y jurisdicción</h2>
+<p class="text-gray-600 leading-relaxed mb-3">Estos Términos se rigen por las leyes de la República Argentina. Cualquier controversia se someterá a los tribunales ordinarios competentes de la República Argentina, sin perjuicio de los derechos que correspondan a los consumidores según la normativa vigente.</p>
+<h2 class="text-xl font-bold text-gray-900 mt-10 mb-3">14. Contacto</h2>
+<p class="text-gray-600 leading-relaxed mb-3">Para consultas, reclamos o ejercer tus derechos, escribinos desde la página de <a href="{{ url_for('public.contact') }}" class="text-green-700 font-semibold hover:underline">Contacto</a>.</p>
+{% endblock %}

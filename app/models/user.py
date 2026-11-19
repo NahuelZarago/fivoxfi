@@ -23,6 +23,9 @@ class User(UserMixin, db.Model):
     is_superadmin = db.Column(db.Boolean, default=False, nullable=False, server_default=db.false())
     # Identificador estable de la cuenta de Google (claim 'sub'); NULL si nunca entró con Google.
     google_sub = db.Column(db.String(64), unique=True, nullable=True)
+    # Aceptación de los Términos y Condiciones (fecha y versión del texto aceptado).
+    terms_accepted_at = db.Column(db.DateTime, nullable=True)
+    terms_version = db.Column(db.String(20), nullable=True)
     auth_version = db.Column(db.Integer, default=0, nullable=False, server_default='0')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 

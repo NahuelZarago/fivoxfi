@@ -47,6 +47,7 @@
 
     function validateField(field) {
         var v = field.value, label = field.dataset.label || 'Este campo';
+        if (field.type === 'checkbox') return field.required && !field.checked ? (field.dataset.message || label + ' es obligatorio.') : '';
         if (field.required && !v.trim()) return label + ' es obligatorio.';
         if (!v) return '';
         if (field.type === 'email' && !EMAIL.test(v.trim())) return 'Ingresá un email válido, por ejemplo nombre@empresa.com.';
@@ -107,6 +108,7 @@
         var fields = Array.prototype.slice.call(form.querySelectorAll('input[id]'));
         fields.forEach(function (f) {
             if (f.type === 'password' && f.hasAttribute('data-toggle')) addToggle(f);
+            if (f.type === 'checkbox') f.addEventListener('change', function () { setError(f, validateField(f)); });
             f.addEventListener('blur', function () { if (f.value || f.dataset.touched) setError(f, validateField(f)); f.dataset.touched = '1'; });
             f.addEventListener('input', function () {
                 if (f.hasAttribute('data-strength')) updateMeter(f);

@@ -305,7 +305,7 @@ def test_make_admin_cli(app, shop):
 
 def test_registration_never_grants_admin(client):
     client.post('/auth/registro', data={'username': 'Eve', 'email': 'eve@t.com', 'password': 'Clave1234!x',
-                                        'confirm_password': 'Clave1234!x', 'is_superadmin': '1'})
+                                        'confirm_password': 'Clave1234!x', 'accept_terms': '1', 'is_superadmin': '1'})
     u = User.query.filter_by(email='eve@t.com').first()
     assert u is not None and u.is_superadmin is False
 
